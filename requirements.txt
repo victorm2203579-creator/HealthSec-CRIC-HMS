@@ -1,0 +1,45 @@
+# requirements.txt
+# =================
+# Python dependencies for the HealthSec CRIC HMS project.
+# Install with:  pip install -r requirements.txt
+#
+# Python version: 3.11+
+
+# ── Core Django framework ──────────────────────────────────────────────────
+django==4.2.*                   # LTS release (security support until April 2026)
+
+# ── REST API ───────────────────────────────────────────────────────────────
+djangorestframework             # DRF: class-based API views, serializers, auth
+
+# ── Cross-Origin Resource Sharing ─────────────────────────────────────────
+django-cors-headers             # Adds CORS headers so frontend JS can call the API
+
+# ── Image handling ─────────────────────────────────────────────────────────
+Pillow                          # Required by ImageField (user avatars)
+
+# ── PostgreSQL database adapter ────────────────────────────────────────────
+psycopg2-binary                 # PostgreSQL driver; binary build avoids C compiler
+
+# ── Environment variable management ──────────────────────────────────────
+python-dotenv                   # Loads .env file into os.environ
+
+# ── PDF report generation ─────────────────────────────────────────────────
+reportlab                       # PDF creation (used in reports/services.py)
+
+# ── Data science / risk scoring ───────────────────────────────────────────
+scikit-learn                    # Machine learning (anomaly detection, clustering)
+numpy                           # Numerical arrays (dependency of scikit-learn)
+pandas                          # DataFrames for analytics and report data prep
+matplotlib                      # Chart generation for embedded PDF graphs
+
+# ── HTTP client (threat intel feed ingestion) ─────────────────────────────
+requests                        # Fetch external CVE / threat intel APIs
+
+# ── Rate limiting ─────────────────────────────────────────────────────────
+django-ratelimit                # Decorator-based rate limiting on login views
+
+# ── Static file serving ───────────────────────────────────────────────────
+whitenoise                      # Serves static files in production (no nginx needed for dev)
+
+# ── Production WSGI server ────────────────────────────────────────────────
+gunicorn                        # WSGI server for production deployment

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Disable Two-Factor Authentication{% endblock %}
+{% block page_title %}Disable 2FA{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Disable Two-Factor Authentication</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> Disabling 2FA will reduce the security of your account.
+                        You will no longer need to enter a code when logging in.
+                    </div>
+
+                    {% if totp_auth.is_enabled %}
+                    <p>
+                        Your two-factor authentication is currently <strong class="text-success">enabled</strong>.
+                        Click the button below to disable it.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-times"></i> Disable 2FA
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="text-muted">
+                        Two-factor authentication is not currently enabled on your account.
+                    </p>
+
+                    <a href="{% url 'accounts:totp_setup' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-shield-alt"></i> Setup 2FA
+                    </a>
+                    {% endif %}
+
+                    <hr />
+
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-secondary w-100">
+                        Back to Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

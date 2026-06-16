@@ -1,0 +1,489 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}HealthSec CRIC HMS{% endblock %}</title>
+
+  <!-- Font Awesome 5 -->
+  <link rel="stylesheet" href="{% static 'azia/lib/@fortawesome/fontawesome-free/css/all.min.css' %}">
+  <!-- Azia base CSS (cards, forms, tables, badges) -->
+  <link rel="stylesheet" href="{% static 'azia/css/azia.css' %}">
+  <!-- BS5 compat shim -->
+  <link rel="stylesheet" href="{% static 'azia/css/hs-compat.css' %}">
+  <!-- Sidebar layout -->
+  <link rel="stylesheet" href="{% static 'azia/css/hs-sidebar.css' %}">
+
+  <style>
+    /* Modal backdrop and content fixes */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    .modal-header {
+      border-bottom: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+    }
+    .modal-body {
+      background-color: #fff;
+    }
+    .modal-footer {
+      border-top: 1px solid #e5e7eb;
+      background-color: #f9fafb;
+    }
+    /* Textarea styling in modals */
+    .modal textarea.form-control {
+      min-height: 100px;
+      background-color: #fff;
+      border: 1px solid #d1d5db;
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="hs-wrapper" id="hsWrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════════════════════════════════ -->
+  <aside class="hs-sidebar" id="hsSidebar">
+
+    <!-- Logo -->
+    <a href="{% url 'dashboard:index' %}" class="hs-logo">
+      <div class="hs-logo-icon">
+        <!-- Medical cross inside shield — health + security -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </div>
+      <div>
+        <span class="hs-logo-text">HealthSec</span>
+        <span class="hs-logo-sub">CRIC HMS</span>
+      </div>
+    </a>
+
+    <!-- Navigation -->
+    <nav class="hs-nav" id="hsNav">
+
+      <!-- MAIN -->
+      <div class="hs-nav-section">Main</div>
+
+      <a href="{% url 'dashboard:index' %}"
+         class="hs-nav-link {% if request.resolver_match.namespace == 'dashboard' and request.resolver_match.url_name == 'index' %}active{% endif %}">
+        <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="hs-nav-label">Dashboard</span>
+      </a>
+
+      <!-- Monitoring -->
+      <div class="hs-nav-group {% if request.resolver_match.namespace == 'monitoring' %}open{% endif %}">
+        <button type="button" class="hs-nav-btn">
+          <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="hs-nav-label">Monitoring</span>
+          <svg class="hs-nav-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="hs-nav-sub">
+          <a href="{% url 'monitoring:system_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'system_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+            Healthcare Systems
+          </a>
+          <a href="{% url 'monitoring:event_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'event_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Monitoring Events
+          </a>
+          <a href="{% url 'monitoring:suspicious_activity_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'suspicious_activity_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Suspicious Activity
+          </a>
+        </div>
+      </div>
+
+      <!-- Risk Engine -->
+      <div class="hs-nav-group {% if request.resolver_match.namespace == 'risk_engine' %}open{% endif %}">
+        <button type="button" class="hs-nav-btn">
+          <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span class="hs-nav-label">Risk Engine</span>
+          <svg class="hs-nav-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="hs-nav-sub">
+          <a href="{% url 'risk_engine:risk_dashboard' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'risk_dashboard' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Risk Dashboard
+          </a>
+          <a href="{% url 'risk_engine:threat_event_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'threat_event_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Threat Events
+          </a>
+          <a href="{% url 'risk_engine:vulnerability_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'vulnerability_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Vulnerabilities
+          </a>
+          <a href="{% url 'risk_engine:risk_assessment' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'risk_assessment' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Assessments
+          </a>
+        </div>
+      </div>
+
+      <!-- Compliance -->
+      <div class="hs-nav-group {% if request.resolver_match.namespace == 'compliance' %}open{% endif %}">
+        <button type="button" class="hs-nav-btn">
+          <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span class="hs-nav-label">Compliance</span>
+          <svg class="hs-nav-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="hs-nav-sub">
+          <a href="{% url 'compliance:summary' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'summary' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Overview
+          </a>
+          <a href="{% url 'compliance:framework_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'framework_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Frameworks
+          </a>
+          <a href="{% url 'compliance:control_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'control_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Controls
+          </a>
+          <a href="{% url 'compliance:remediation' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'remediation' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Remediation
+          </a>
+        </div>
+      </div>
+
+      <!-- Alerts -->
+      <div class="hs-nav-group {% if request.resolver_match.namespace == 'alerts' %}open{% endif %}">
+        <button type="button" class="hs-nav-btn">
+          <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="hs-nav-label">Alerts</span>
+          {% if unread_alerts_count %}
+          <span class="hs-nav-badge" style="background:#dc3545;color:#fff;font-size:.62rem;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:auto;">{{ unread_alerts_count }}</span>
+          {% endif %}
+          <svg class="hs-nav-arrow {% if unread_alerts_count %}ml-1{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="hs-nav-sub">
+          <a href="{% url 'alerts:alert_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'alert_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            All Alerts
+          </a>
+          <a href="{% url 'alerts:incident_list' %}" class="hs-nav-sub-link {% if request.resolver_match.url_name == 'incident_list' %}active{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Incidents
+          </a>
+        </div>
+      </div>
+
+      <!-- TOOLS -->
+      <div class="hs-nav-section">Tools</div>
+
+      <a href="{% url 'audit:log_list' %}"
+         class="hs-nav-link {% if request.resolver_match.namespace == 'audit' %}active{% endif %}">
+        <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+        <span class="hs-nav-label">Audit Log</span>
+      </a>
+
+      <a href="{% url 'reports:report_list' %}"
+         class="hs-nav-link {% if request.resolver_match.namespace == 'reports' %}active{% endif %}">
+        <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span class="hs-nav-label">Reports</span>
+      </a>
+
+      {% if request.user.is_admin %}
+      <!-- ADMIN -->
+      <div class="hs-nav-section">Admin</div>
+
+      <a href="{% url 'accounts:user_list' %}"
+         class="hs-nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}">
+        <svg class="hs-nav-ic" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="hs-nav-label">Users</span>
+      </a>
+      {% endif %}
+
+    </nav>
+
+    <!-- Sidebar footer: user info + logout -->
+    <div class="hs-sidebar-foot">
+      <div class="hs-foot-avatar">{{ request.user.username|first|upper }}</div>
+      <div class="hs-foot-info">
+        <div class="hs-foot-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="hs-foot-role">{{ request.user.role }}</div>
+      </div>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="hs-foot-logout" title="Sign Out">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </form>
+    </div>
+
+  </aside><!-- hs-sidebar -->
+
+  <!-- Mobile overlay -->
+  <div class="hs-overlay" id="hsOverlay"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN AREA
+  ════════════════════════════════════════════════════════════ -->
+  <div class="hs-main" id="hsMain">
+
+    <!-- TOP BAR -->
+    <header class="hs-topbar">
+      <button class="hs-menu-toggle" id="hsMenuToggle" title="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <!-- Live badge -->
+      <div class="hs-live d-none d-md-flex">
+        <span class="hs-live-dot"></span> LIVE
+      </div>
+
+      <div class="hs-topbar-right">
+
+        <!-- Notification bell -->
+        <button class="hs-notif" id="notifBell" title="Notifications">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          {% if notifications_total %}
+          <span class="hs-notif-badge" id="notifBadge">{{ notifications_total }}</span>
+          {% else %}
+          <span class="hs-notif-badge" id="notifBadge" style="display:none;">0</span>
+          {% endif %}
+        </button>
+
+        <!-- User menu -->
+        <div class="dropdown">
+          <button class="hs-topbar-user" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="hs-topbar-avatar">{{ request.user.username|first|upper }}</div>
+            <div class="d-none d-sm-block text-left" style="line-height:1.2;">
+              <div class="hs-topbar-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+              <div class="hs-topbar-role">{{ request.user.role }}</div>
+            </div>
+            <svg class="hs-topbar-chevron ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <a href="{% url 'accounts:profile' %}" class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;margin-right:6px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              My Profile
+            </a>
+            <a href="{% url 'accounts:change_password' %}" class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;margin-right:6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Change Password
+            </a>
+            {% if request.user.is_admin %}
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'accounts:user_list' %}" class="dropdown-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;margin-right:6px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Manage Users
+            </a>
+            {% endif %}
+            <div class="dropdown-divider"></div>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-item" style="color:#dc3545;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;margin-right:6px;color:#dc3545;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign Out
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </header><!-- hs-topbar -->
+
+    <!-- Flash messages -->
+    {% if messages %}
+    <div class="hs-messages">
+      {% for message in messages %}
+      <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- PAGE CONTENT -->
+    <main class="hs-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="hs-footer">
+      <span>&copy; {% now "Y" %} HealthSec CRIC HMS &mdash; Cyber Risk Intelligence &amp; Compliance</span>
+      <span style="display:flex;align-items:center;gap:5px;">
+        <span class="hs-live-dot"></span> System Operational
+      </span>
+    </footer>
+
+  </div><!-- hs-main -->
+</div><!-- hs-wrapper -->
+
+<!-- ── Notification Drawer ─────────────────────────────────────────────── -->
+<div class="hs-nd-overlay" id="notifOverlay"></div>
+<div class="hs-nd" id="notifDrawer">
+  <div class="hs-nd-head">
+    <div>
+      <span class="hs-nd-title">Notifications</span>
+      {% if notifications_total %}<span class="hs-nd-pill">{{ notifications_total }} new</span>{% endif %}
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      {% if notifications_total %}
+      <button class="hs-nd-mark-all" id="markAllRead" title="Mark all alerts as read">
+        <i class="fas fa-check-double"></i> Mark all read
+      </button>
+      {% endif %}
+      <button class="hs-nd-close" id="notifClose" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="hs-nd-body">
+    {% if notifications %}
+      {% for n in notifications %}
+      <a href="{{ n.url }}" class="hs-nd-item">
+        <span class="hs-nd-dot" style="background:{{ n.colour }};"></span>
+        <span class="hs-nd-content">
+          <span class="hs-nd-item-title">{{ n.title|truncatechars:50 }}</span>
+          <span class="hs-nd-item-sub">{{ n.sub }}</span>
+        </span>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div class="hs-nd-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;opacity:.2;margin-bottom:10px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <p>You're all caught up</p>
+        <small>No new notifications</small>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="hs-nd-foot">
+    <a href="{% url 'alerts:alert_list' %}">
+      <i class="fas fa-bell me-1"></i> All Alerts
+    </a>
+    <a href="{% url 'alerts:incident_list' %}">
+      <i class="fas fa-fire-alt me-1"></i> Incidents
+    </a>
+    <a href="{% url 'audit:log_list' %}">
+      <i class="fas fa-list-alt me-1"></i> Audit Log
+    </a>
+  </div>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────── -->
+<script src="{% static 'azia/lib/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'azia/lib/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<!-- Sidebar JS -->
+<script>
+(function () {
+  'use strict';
+
+  var wrapper = document.getElementById('hsWrapper');
+  var toggle  = document.getElementById('hsMenuToggle');
+  var overlay = document.getElementById('hsOverlay');
+  var isDesktop = function () { return window.innerWidth >= 992; };
+
+  /* Toggle sidebar */
+  toggle.addEventListener('click', function () {
+    if (isDesktop()) {
+      wrapper.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('hs-sb-collapsed', wrapper.classList.contains('sidebar-collapsed') ? '1' : '0');
+    } else {
+      wrapper.classList.toggle('sidebar-open');
+    }
+  });
+
+  /* Close on overlay click (mobile) */
+  overlay.addEventListener('click', function () {
+    wrapper.classList.remove('sidebar-open');
+  });
+
+  /* Restore collapsed state on desktop */
+  if (isDesktop() && localStorage.getItem('hs-sb-collapsed') === '1') {
+    wrapper.classList.add('sidebar-collapsed');
+  }
+
+  /* Sub-menu toggles */
+  document.querySelectorAll('.hs-nav-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var group = this.closest('.hs-nav-group');
+      var isOpen = group.classList.contains('open');
+      /* Close all siblings */
+      document.querySelectorAll('.hs-nav-group.open').forEach(function (g) {
+        g.classList.remove('open');
+      });
+      if (!isOpen) group.classList.add('open');
+    });
+  });
+
+  /* BS5 data-bs-* → BS4 shim */
+  document.querySelectorAll('[data-bs-toggle]').forEach(function (el) {
+    el.setAttribute('data-toggle', el.getAttribute('data-bs-toggle'));
+  });
+  document.querySelectorAll('[data-bs-dismiss]').forEach(function (el) {
+    el.setAttribute('data-dismiss', el.getAttribute('data-bs-dismiss'));
+  });
+  document.querySelectorAll('[data-bs-target]').forEach(function (el) {
+    el.setAttribute('data-target', el.getAttribute('data-bs-target'));
+  });
+
+})();
+</script>
+
+<!-- Notification Drawer JS -->
+<script>
+(function () {
+  var bell    = document.getElementById('notifBell');
+  var drawer  = document.getElementById('notifDrawer');
+  var overlay = document.getElementById('notifOverlay');
+  var closer  = document.getElementById('notifClose');
+  var markBtn = document.getElementById('markAllRead');
+
+  function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+
+  if (bell)    bell.addEventListener('click', openDrawer);
+  if (closer)  closer.addEventListener('click', closeDrawer);
+  if (overlay) overlay.addEventListener('click', closeDrawer);
+
+  if (markBtn) {
+    markBtn.addEventListener('click', function () {
+      var csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      fetch('{% url "alerts:mark_all_read" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.ok) {
+          var badge = document.getElementById('notifBadge');
+          if (badge) badge.style.display = 'none';
+          var sidebarBadge = document.querySelector('.hs-nav-badge');
+          if (sidebarBadge) sidebarBadge.style.display = 'none';
+          markBtn.textContent = 'All read';
+          markBtn.disabled = true;
+          document.querySelectorAll('.hs-nd-dot[style*="#dc3545"]').forEach(function(dot) {
+            dot.style.background = '#9ca3af';
+          });
+        }
+      }).catch(function () {});
+    });
+  }
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

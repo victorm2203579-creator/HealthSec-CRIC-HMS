@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ framework.short_name }}{% endblock %}
+{% block page_title %}{{ framework.name }}{% endblock %}
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <a href="{% url 'compliance:framework_list' %}" class="btn btn-xs btn-hs-outline mb-2">
+      <i class="fa-solid fa-arrow-left me-1"></i> All Frameworks
+    </a>
+    <h1><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>{{ framework.short_name }} Controls</h1>
+    <p class="text-muted2 mb-0">{{ framework.name }} v{{ framework.version }} — {{ framework.applicable_region }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    {% if request.user.is_compliance_officer %}
+    <form method="post" action="{% url 'compliance:run_check' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-hs-primary">
+        <i class="fa-solid fa-play me-1"></i> Run Check
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead><tr><th>Code</th><th>Title</th><th>Category</th><th>Weight</th><th>Latest Status</th></tr></thead>
+        <tbody>
+          {% for ctrl in controls %}
+          <tr>
+            <td><code class="text-cyber">{{ ctrl.control_code }}</code></td>
+            <td>
+              <span class="text-white">{{ ctrl.title }}</span>
+              {% if ctrl.automated_check %}
+              <small class="badge bg-secondary ms-1">Auto</small>
+              {% endif %}
+            </td>
+            <td><small class="text-muted2">{{ ctrl.get_control_category_display }}</small></td>
+            <td><small class="text-muted2">{{ ctrl.weight }}</small></td>
+            <td>
+              {% if ctrl.latest_result %}
+              <span class="badge {{ ctrl.latest_result.get_status_badge_class }}">
+                {{ ctrl.latest_result.get_status_display }}
+              </span>
+              {% else %}
+              <span class="badge bg-secondary">Not Checked</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted2 py-4">
+            No controls for this framework yet.
+            {% if request.user.is_compliance_officer %}
+              <a href="/admin/compliance/compliancecontrol/add/" class="ms-2 text-cyber">Add via Admin →</a>
+            {% endif %}
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

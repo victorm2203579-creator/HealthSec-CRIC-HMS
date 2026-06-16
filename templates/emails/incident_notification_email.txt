@@ -1,0 +1,28 @@
+SECURITY INCIDENT CREATED
+==============================================================
+
+A new security incident has been created and requires attention.
+
+Incident Details:
+  Incident ID: {{ incident.incident_number }}
+  Title:       {{ incident.title }}
+  Phase:       {{ incident.get_phase_display }}
+  Detected:    {{ incident.detected_at|date:"Y-m-d H:i:s" }} WAT
+  {% if incident.incident_commander %}Commander:  {{ incident.incident_commander.get_full_name|default:incident.incident_commander.username }}{% else %}Commander:  Not assigned{% endif %}
+
+Description:
+{{ incident.description }}
+
+Required Actions:
+  1. Acknowledge - Log in to the incident management system
+  2. Investigate - Review related alerts and evidence
+  3. Coordinate - Work with the incident commander on response
+  4. Document - Record timeline and findings
+
+View incident details:
+{{ incident_url }}
+
+==============================================================
+This is an automated notification from {{ site_name }}.
+Do not reply to this email. For support, contact your system
+administrator.

@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>500 Server Error | HealthSec CRIC HMS</title>
+  <link href="{% static 'azia/lib/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'azia/lib/typicons.font/typicons.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'azia/css/azia.css' %}">
+  <style>
+    body { background: #f4f5fb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .error-page { text-align: center; padding: 2rem; }
+    .error-num { font-size: 8rem; font-weight: 800; color: #dc3545; line-height: 1; letter-spacing: -4px; }
+    .error-icon { font-size: 4rem; color: #dc3545; margin-bottom: 1rem; }
+    .error-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 1rem 0 .5rem; }
+    .error-text { color: #6c757d; margin-bottom: 2rem; max-width: 420px; }
+    .btn-back { background: #dc3545; color: #fff; border: none; border-radius: 4px; padding: .6rem 1.5rem; font-weight: 600; text-decoration: none; }
+    .btn-back:hover { background: #c82333; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <div class="error-icon"><i class="typcn typcn-warning-outline"></i></div>
+    <p class="error-num">500</p>
+    <h4 class="error-title">Internal Server Error</h4>
+    <p class="error-text mx-auto">Something went wrong on our end. The error has been logged. Please contact your system administrator.</p>
+    <a href="/dashboard/" class="btn-back">Return to Dashboard</a>
+  </div>
+  <script src="{% static 'azia/lib/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'azia/lib/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

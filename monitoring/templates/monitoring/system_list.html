@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block page_title %}Systems — HealthSec{% endblock %}
+{% block page_header %}Healthcare Systems{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <p class="text-muted mb-0" style="font-size:0.875rem;">All monitored healthcare information systems</p>
+  </div>
+</div>
+
+{% if systems %}
+<div class="row g-3">
+  {% for system in systems %}
+  <div class="col-12 col-md-6 col-xl-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <h6 class="mb-0 text-white fw-600">{{ system.name }}</h6>
+          {% if system.status == 'ACTIVE' %}
+          <span class="badge" style="background:rgba(6,214,160,0.2);color:#06d6a0;font-size:0.7rem;">Active</span>
+          {% elif system.status == 'DEGRADED' %}
+          <span class="badge" style="background:rgba(243,156,18,0.2);color:#f39c12;font-size:0.7rem;">Degraded</span>
+          {% elif system.status == 'MAINTENANCE' %}
+          <span class="badge" style="background:rgba(0,180,216,0.2);color:#00b4d8;font-size:0.7rem;">Maintenance</span>
+          {% else %}
+          <span class="badge" style="background:rgba(239,35,60,0.2);color:#ef233c;font-size:0.7rem;">Offline</span>
+          {% endif %}
+        </div>
+        <p class="text-muted mb-2" style="font-size:0.8rem;">{{ system.description|default:"No description"|truncatechars:80 }}</p>
+        <div class="d-flex gap-2 flex-wrap">
+          {% if system.contains_phi %}
+          <span class="badge" style="background:rgba(239,35,60,0.15);color:#ef233c;font-size:0.68rem;"><i class="fa-solid fa-triangle-exclamation me-1"></i>PHI</span>
+          {% endif %}
+          <span class="badge" style="background:rgba(0,180,216,0.1);color:#00b4d8;font-size:0.68rem;">{{ system.system_type|default:"Unknown" }}</span>
+        </div>
+        <div class="mt-3">
+          <a href="{% url 'monitoring:system_detail' system.pk %}" class="btn btn-sm btn-hs-primary">View Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="hs-card">
+  <div class="hs-card-body text-center py-5">
+    <i class="fa-solid fa-hospital-user fa-3x mb-3" style="color:var(--hs-text-muted);"></i>
+    <p class="text-muted">No healthcare systems registered yet.</p>
+    <a href="/admin/monitoring/healthcaresystem/add/" class="btn btn-hs-primary btn-sm">Add System</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

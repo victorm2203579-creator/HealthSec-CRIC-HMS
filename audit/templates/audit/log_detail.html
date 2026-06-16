@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+{% block title %}Audit Log — {{ log.action }}{% endblock %}
+{% block page_title %}Audit Log Detail{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{% url 'audit:log_list' %}" class="btn btn-xs btn-hs-outline mb-2">
+    <i class="fa-solid fa-arrow-left me-1"></i> Back to Logs
+  </a>
+  <h1><code class="text-cyber">{{ log.log_id|truncatechars:13 }}</code> — {{ log.action }}</h1>
+  <p class="text-muted2">{{ log.timestamp|date:"M d, Y H:i:s" }}</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {# ── Description ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Action Description</span></div>
+      <div class="hs-card-body">
+        <p>{{ log.description }}</p>
+      </div>
+    </div>
+
+    {# ── Change Details ── #}
+    {% if log.old_value or log.new_value %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Before & After</span></div>
+      <div class="hs-card-body">
+        {% if log.old_value %}
+        <div class="mb-3">
+          <small class="text-muted2"><strong>Previous Value</strong></small>
+          <pre style="background:var(--hs-bg-dark);padding:0.75rem;border-radius:var(--hs-border-radius);"><code>{{ log.old_value|safe }}</code></pre>
+        </div>
+        {% endif %}
+        {% if log.new_value %}
+        <div>
+          <small class="text-muted2"><strong>New Value</strong></small>
+          <pre style="background:var(--hs-bg-dark);padding:0.75rem;border-radius:var(--hs-border-radius);"><code>{{ log.new_value|safe }}</code></pre>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Raw Data ── #}
+    <div class="hs-card">
+      <div class="hs-card-header"><span class="hs-card-title">Full Log Entry</span></div>
+      <div class="hs-card-body">
+        <table class="table table-sm">
+          <tbody>
+            <tr>
+              <th style="width:150px;">Log ID</th>
+              <td><code>{{ log.log_id }}</code></td>
+            </tr>
+            <tr>
+              <th>User</th>
+              <td>{{ log.user.username|default:"System" }}</td>
+            </tr>
+            <tr>
+              <th>Action Category</th>
+              <td><span class="badge badge-medium">{{ log.get_action_category_display }}</span></td>
+            </tr>
+            <tr>
+              <th>Action</th>
+              <td><code>{{ log.action }}</code></td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <span class="badge {% if log.status == 'SUCCESS' %}badge-low{% elif log.status == 'FAILURE' %}badge-critical{% else %}bg-warning{% endif %}">
+                  {{ log.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <th>Target Model</th>
+              <td>{{ log.target_model|default:"—" }}</td>
+            </tr>
+            <tr>
+              <th>Target ID</th>
+              <td><code>{{ log.target_id|default:"—" }}</code></td>
+            </tr>
+            <tr>
+              <th>IP Address</th>
+              <td>{{ log.ip_address|default:"—" }}</td>
+            </tr>
+            <tr>
+              <th>Session Key</th>
+              <td><code class="small">{{ log.session_key|default:"—" }}</code></td>
+            </tr>
+            <tr>
+              <th>Timestamp</th>
+              <td>{{ log.timestamp|date:"M d, Y H:i:s" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {# ── Sidebar ── #}
+  <div class="col-lg-4">
+    {# ── Integrity Status ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Integrity Status</span></div>
+      <div class="hs-card-body text-center">
+        {% if integrity_valid %}
+        <div style="font-size:2rem;margin-bottom:0.5rem;">
+          <i class="fa-solid fa-shield-halved" style="color:var(--hs-health-grn);"></i>
+        </div>
+        <h5 style="color:var(--hs-health-grn);">Verified Intact</h5>
+        <small class="text-muted2">This log entry has not been tampered with.</small>
+        {% else %}
+        <div style="font-size:2rem;margin-bottom:0.5rem;">
+          <i class="fa-solid fa-triangle-exclamation" style="color:var(--hs-danger);"></i>
+        </div>
+        <h5 style="color:var(--hs-danger);">Checksum Mismatch</h5>
+        <small class="text-muted2">This log entry may have been tampered with!</small>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Checksum ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Cryptographic Hash</span></div>
+      <div class="hs-card-body">
+        <small class="d-block mb-2">SHA-256 Checksum:</small>
+        <code style="font-size:0.7rem;word-break:break-all;">{{ log.checksum }}</code>
+      </div>
+    </div>
+
+    {# ── User Info ── #}
+    {% if log.user %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">User Details</span></div>
+      <div class="hs-card-body">
+        <p class="mb-0"><strong>{{ log.user.username }}</strong></p>
+        <small class="text-muted2">{{ log.user.email }}</small>
+        {% if log.user.is_admin %}
+        <div class="mt-2"><span class="badge bg-danger">Administrator</span></div>
+        {% elif log.user.is_compliance_officer %}
+        <div class="mt-2"><span class="badge bg-info">Compliance Officer</span></div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Client Info ── #}
+    {% if log.ip_address or log.user_agent %}
+    <div class="hs-card">
+      <div class="hs-card-header"><span class="hs-card-title">Client Information</span></div>
+      <div class="hs-card-body small">
+        {% if log.ip_address %}
+        <div class="mb-2">
+          <strong>IP Address</strong><br>
+          <code>{{ log.ip_address }}</code>
+        </div>
+        {% endif %}
+        {% if log.user_agent %}
+        <div>
+          <strong>User Agent</strong><br>
+          <code style="font-size:0.7rem;word-break:break-all;">{{ log.user_agent }}</code>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

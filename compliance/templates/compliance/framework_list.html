@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Frameworks{% endblock %}
+{% block page_title %}Compliance Frameworks{% endblock %}
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Compliance Frameworks</h1>
+    <p class="text-muted2 mb-0">Active regulatory frameworks</p>
+  </div>
+  <a href="{% url 'compliance:dashboard' %}" class="btn btn-sm btn-hs-primary">
+    <i class="fa-solid fa-gauge me-1"></i> Compliance Dashboard
+  </a>
+</div>
+<div class="row g-3">
+  {% for fw in frameworks %}
+  <div class="col-md-6 col-lg-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title">{{ fw.short_name }} <small class="text-muted2">v{{ fw.version }}</small></span>
+        <span class="badge {% if fw.is_active %}badge-low{% else %}bg-secondary{% endif %}">
+          {% if fw.is_active %}Active{% else %}Inactive{% endif %}
+        </span>
+      </div>
+      <div class="hs-card-body">
+        <p class="text-muted2 small mb-2">{{ fw.description|truncatechars:120 }}</p>
+        <small class="text-muted2">
+          <i class="fa-solid fa-globe me-1"></i>{{ fw.applicable_region }} &nbsp;
+          <i class="fa-solid fa-building me-1"></i>{{ fw.issuing_body }}
+        </small>
+      </div>
+      <div class="hs-card-body border-top" style="border-color:var(--hs-border)!important;padding-top:.75rem!important;">
+        <div class="d-flex gap-2">
+          <a href="{% url 'compliance:framework_detail' fw.pk %}" class="btn btn-xs btn-hs-outline">
+            <i class="fa-solid fa-eye me-1"></i>View Controls
+          </a>
+          <span class="text-muted2 small align-self-center">{{ fw.control_count }} control{{ fw.control_count|pluralize }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12 text-center text-muted2 py-5">
+    No frameworks found. Run <code>python manage.py seed_compliance_data</code>.
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

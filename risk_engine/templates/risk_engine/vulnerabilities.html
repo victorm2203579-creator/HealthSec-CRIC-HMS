@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}Vulnerabilities{% endblock %}
+{% block page_title %}Vulnerability Management{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-bug me-2 text-warning"></i>Vulnerability Records</h1>
+    <p class="text-muted2 mb-0">{{ total_count }} record{{ total_count|pluralize }} &mdash;
+      <span style="color:var(--hs-danger);">{{ unpatched_count }} unpatched</span>
+      {% if critical_count %},
+        <span style="color:#ff006e;">{{ critical_count }} critical unpatched</span>
+      {% endif %}
+    </p>
+  </div>
+  <a href="{% url 'risk_engine:risk_dashboard' %}" class="btn btn-sm btn-hs-outline">
+    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+  </a>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-4">
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-sm-4 col-lg-3">
+        <label class="form-label-sm text-muted2">Severity</label>
+        <select name="severity" class="form-select form-select-sm hs-input">
+          <option value="">All Severities</option>
+          {% for val, label in severity_choices %}
+          <option value="{{ val }}" {% if f_severity == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <label class="form-label-sm text-muted2">Patch Status</label>
+        <select name="patched" class="form-select form-select-sm hs-input">
+          <option value="">All</option>
+          <option value="no"  {% if f_patched == 'no'  %}selected{% endif %}>Unpatched</option>
+          <option value="yes" {% if f_patched == 'yes' %}selected{% endif %}>Patched</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2 d-flex gap-2">
+        <button type="submit" class="btn btn-sm btn-hs-primary flex-grow-1">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+        <a href="{% url 'risk_engine:vulnerability_list' %}" class="btn btn-sm btn-hs-outline">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Vuln Table ── #}
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Title / CVE</th>
+            <th>Component</th>
+            <th style="width:160px;">CVSS Score</th>
+            <th>Severity</th>
+            <th>Discovered</th>
+            <th>Status</th>
+            {% if request.user.is_analyst %}<th></th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for vuln in page_obj %}
+          <tr {% if not vuln.patched and vuln.severity == 'CRITICAL' %}style="background:rgba(255,0,110,.05);"{% endif %}>
+            <td>
+              <strong class="d-block">{{ vuln.title }}</strong>
+              {% if vuln.cve_reference %}
+              <span class="badge bg-secondary font-monospace" style="font-size:.7rem;">{{ vuln.cve_reference }}</span>
+              {% endif %}
+            </td>
+            <td><small class="text-muted2">{{ vuln.affected_component }}</small></td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;background:rgba(255,255,255,.1);">
+                  <div class="progress-bar
+                    {% if vuln.cvss_score >= 9 %}bg-danger
+                    {% elif vuln.cvss_score >= 7 %}bg-warning
+                    {% elif vuln.cvss_score >= 4 %}bg-info
+                    {% else %}bg-success{% endif %}"
+                    style="width:{{ vuln.cvss_bar_width }};"></div>
+                </div>
+                <small class="fw-bold" style="min-width:2.2rem;">{{ vuln.cvss_score|floatformat:1 }}</small>
+              </div>
+            </td>
+            <td>
+              <span class="badge {{ vuln.get_severity_badge_class }}">{{ vuln.severity }}</span>
+            </td>
+            <td>
+              <small class="text-muted2">{{ vuln.discovered_at|date:"d M Y" }}</small>
+            </td>
+            <td>
+              {% if vuln.patched %}
+              <span class="badge badge-low"><i class="fa-solid fa-check me-1"></i>Patched</span>
+              {% if vuln.patched_at %}
+              <br><small class="text-muted2">{{ vuln.patched_at|date:"d M Y" }}</small>
+              {% endif %}
+              {% else %}
+              <span class="badge badge-critical">Unpatched</span>
+              {% endif %}
+            </td>
+            {% if request.user.is_analyst %}
+            <td class="text-end">
+              {% if not vuln.patched %}
+              <button class="btn btn-xs btn-hs-primary" data-bs-toggle="modal"
+                      data-bs-target="#patchModal"
+                      data-pk="{{ vuln.pk }}"
+                      data-title="{{ vuln.title|escapejs }}">
+                <i class="fa-solid fa-shield-halved me-1"></i> Mark Patched
+              </button>
+              {% else %}
+              <span class="text-muted2" style="font-size:.75rem;">Done</span>
+              {% endif %}
+            </td>
+            {% endif %}
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted2 py-5">
+              <i class="fa-solid fa-circle-check fa-2x mb-2 d-block" style="color:var(--hs-health-grn);"></i>
+              No vulnerability records match the current filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}&severity={{ f_severity }}&patched={{ f_patched }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}&severity={{ f_severity }}&patched={{ f_patched }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{# ── Mark Patched Modal ── #}
+{% if request.user.is_analyst %}
+<div class="modal fade" id="patchModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--hs-surface);border:1px solid var(--hs-border);">
+      <div class="modal-header" style="border-color:var(--hs-border);">
+        <h5 class="modal-title"><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Mark as Patched</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" id="patchForm" action="">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p class="text-muted2 mb-3">Marking <strong id="patchTitle"></strong> as patched.</p>
+          <div class="mb-3">
+            <label class="form-label-sm text-muted2">Patch Notes (optional)</label>
+            <textarea name="patch_notes" class="form-control hs-input" rows="3"
+                      placeholder="Describe the patch applied, ticket reference, etc."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-color:var(--hs-border);">
+          <button type="button" class="btn btn-sm btn-hs-outline" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-sm btn-hs-primary">
+            <i class="fa-solid fa-check me-1"></i> Confirm Patch
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('patchModal')?.addEventListener('show.bs.modal', function(e) {
+  const btn = e.relatedTarget;
+  document.getElementById('patchTitle').textContent = btn.dataset.title;
+  document.getElementById('patchForm').action = `/risk/vulnerabilities/${btn.dataset.pk}/patch/`;
+});
+</script>
+{% endblock %}

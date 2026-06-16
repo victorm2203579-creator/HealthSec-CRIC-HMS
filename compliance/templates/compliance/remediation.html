@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Remediation Tracker{% endblock %}
+{% block page_title %}Remediation Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-wrench me-2 text-warning"></i>Remediation Tracker</h1>
+    <p class="text-muted2 mb-0">{{ total_issues }} control{{ total_issues|pluralize }} requiring attention</p>
+  </div>
+  <a href="{% url 'compliance:dashboard' %}" class="btn btn-sm btn-hs-outline">
+    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+  </a>
+</div>
+
+{# ── Summary KPIs ── #}
+<div class="row g-3 mb-4">
+  <div class="col-4">
+    <div class="kpi-card {% if fail_count %}glow-danger{% endif %}" style="--kpi-accent:var(--hs-danger);">
+      <div class="kpi-value" style="color:var(--hs-danger);">{{ fail_count }}</div>
+      <div class="kpi-label">Failing Controls</div>
+      <i class="fa-solid fa-circle-xmark kpi-icon" style="color:var(--hs-danger);"></i>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="kpi-card" style="--kpi-accent:var(--hs-warning);">
+      <div class="kpi-value" style="color:var(--hs-warning);">{{ partial_count }}</div>
+      <div class="kpi-label">Partial Controls</div>
+      <i class="fa-solid fa-circle-half-stroke kpi-icon" style="color:var(--hs-warning);"></i>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="kpi-card" style="--kpi-accent:var(--hs-cyber-blue);">
+      <div class="kpi-value" style="color:var(--hs-cyber-blue);">{{ pending_count }}</div>
+      <div class="kpi-label">Pending Review</div>
+      <i class="fa-solid fa-clock kpi-icon text-cyber"></i>
+    </div>
+  </div>
+</div>
+
+{% if not request.user.is_compliance_officer %}
+<div class="alert" style="background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.3);border-radius:8px;margin-bottom:1.5rem;">
+  <i class="fa-solid fa-lock me-2" style="color:var(--hs-warning);"></i>
+  You are viewing this page in read-only mode. Compliance Officer role is required to update control status.
+</div>
+{% endif %}
+
+{# ── Remediation Items ── #}
+{% for item in page_obj %}
+<div class="hs-card mb-3" style="border-left:4px solid
+  {% if item.status == 'FAIL' %}var(--hs-danger)
+  {% elif item.status == 'PARTIAL' %}var(--hs-warning)
+  {% else %}var(--hs-cyber-blue){% endif %};">
+  <div class="hs-card-body">
+    <div class="row g-3 align-items-start">
+
+      {# Left: control info #}
+      <div class="col-lg-7">
+        <div class="d-flex align-items-start gap-2 mb-2">
+          <span class="badge {{ item.latest_result.get_status_badge_class|default:'bg-secondary' }}">
+            {{ item.status }}
+          </span>
+          <code class="text-cyber" style="font-size:.78rem;">{{ item.control.control_code }}</code>
+          <span class="badge bg-secondary" style="font-size:.65rem;">{{ item.control.framework.short_name }}</span>
+        </div>
+        <h6 class="mb-1">{{ item.control.title }}</h6>
+        <small class="text-muted2 d-block mb-2">{{ item.control.get_control_category_display }}</small>
+
+        {% if item.latest_result %}
+          {% if item.latest_result.notes %}
+          <div class="mb-2">
+            <small class="text-muted2 fw-semibold d-block">Finding:</small>
+            <small>{{ item.latest_result.notes }}</small>
+          </div>
+          {% endif %}
+          {% if item.latest_result.remediation_steps %}
+          <div class="p-2 rounded mb-2" style="background:rgba(0,0,0,.2);border:1px solid var(--hs-border);">
+            <small class="text-muted2 fw-semibold d-block mb-1"><i class="fa-solid fa-circle-chevron-right me-1 text-cyber"></i>Remediation Steps:</small>
+            <small style="white-space:pre-line;">{{ item.latest_result.remediation_steps }}</small>
+          </div>
+          {% endif %}
+          {% if item.latest_result.due_date %}
+          <small class="text-muted2">
+            <i class="fa-solid fa-calendar-day me-1"></i>
+            Due: <strong {% if item.latest_result.due_date < today %}style="color:var(--hs-danger);"{% endif %}>
+              {{ item.latest_result.due_date|date:"d M Y" }}
+            </strong>
+          </small>
+          {% endif %}
+        {% else %}
+          <small class="text-muted2">No check results yet. Run automated checks to populate.</small>
+        {% endif %}
+      </div>
+
+      {# Right: score + manual override form #}
+      <div class="col-lg-5">
+        {% if item.latest_result %}
+        <div class="text-center mb-3">
+          <div style="font-size:2rem;font-weight:700;color:
+            {% if item.latest_result.score >= 80 %}var(--hs-health-grn)
+            {% elif item.latest_result.score >= 50 %}var(--hs-warning)
+            {% else %}var(--hs-danger){% endif %};">
+            {{ item.latest_result.score|floatformat:0 }}%
+          </div>
+          <small class="text-muted2">Last checked {{ item.latest_result.checked_at|timesince }} ago</small>
+        </div>
+        {% endif %}
+
+        {% if request.user.is_compliance_officer %}
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="control_pk" value="{{ item.control.pk }}">
+          <div class="mb-2">
+            <label class="form-label-sm text-muted2">Update Status</label>
+            <select name="status" class="form-select form-select-sm hs-input">
+              {% for val, label in status_choices %}
+              <option value="{{ val }}" {% if item.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <textarea name="notes" class="form-control hs-input" rows="2"
+                      placeholder="Describe what was remediated…" style="font-size:.8rem;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-xs btn-hs-primary w-100">
+            <i class="fa-solid fa-save me-1"></i> Save Override
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="hs-card text-center py-5">
+  <i class="fa-solid fa-champagne-glasses fa-3x mb-3" style="color:var(--hs-health-grn);"></i>
+  <h4 style="color:var(--hs-health-grn);">No remediation items!</h4>
+  <p class="text-muted2">All controls are passing or not yet checked.</p>
+  <a href="{% url 'compliance:control_list' %}" class="btn btn-sm btn-hs-outline mt-2">View All Controls</a>
+</div>
+{% endfor %}
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-calculate today for due date highlighting in template
+const today = new Date().toISOString().slice(0, 10);
+</script>
+{% endblock %}

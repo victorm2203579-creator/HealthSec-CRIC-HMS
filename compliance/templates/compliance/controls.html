@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Compliance Controls{% endblock %}
+{% block page_title %}Compliance Controls{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-list-check me-2 text-cyber"></i>Compliance Controls</h1>
+    <p class="text-muted2 mb-0">{{ total_count }} control{{ total_count|pluralize }} across all active frameworks</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'compliance:remediation' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-wrench me-1"></i> Remediation
+    </a>
+    <a href="{% url 'compliance:dashboard' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+    </a>
+  </div>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-4">
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-sm-4 col-lg-3">
+        <label class="form-label-sm text-muted2">Framework</label>
+        <select name="framework" class="form-select form-select-sm hs-input">
+          <option value="">All Frameworks</option>
+          {% for fw in frameworks %}
+          <option value="{{ fw.pk }}" {% if f_framework == fw.pk|stringformat:"s" %}selected{% endif %}>
+            {{ fw.short_name }} – {{ fw.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-3">
+        <label class="form-label-sm text-muted2">Category</label>
+        <select name="category" class="form-select form-select-sm hs-input">
+          <option value="">All Categories</option>
+          {% for val, label in category_choices %}
+          <option value="{{ val }}" {% if f_category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-2">
+        <label class="form-label-sm text-muted2">Status</label>
+        <select name="status" class="form-select form-select-sm hs-input">
+          <option value="">All Status</option>
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if f_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-lg-2 d-flex gap-2">
+        <button type="submit" class="btn btn-sm btn-hs-primary flex-grow-1">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+        <a href="{% url 'compliance:control_list' %}" class="btn btn-sm btn-hs-outline">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Controls Table ── #}
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Title</th>
+            <th>Framework</th>
+            <th>Category</th>
+            <th>Weight</th>
+            <th>Auto</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Last Checked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ctrl in page_obj %}
+          <tr>
+            <td>
+              <code class="text-cyber" style="font-size:.78rem;">{{ ctrl.control_code }}</code>
+            </td>
+            <td style="max-width:220px;">
+              <small class="fw-semibold d-block">{{ ctrl.title }}</small>
+              <small class="text-muted2">{{ ctrl.description|truncatechars:60 }}</small>
+            </td>
+            <td>
+              <span class="badge bg-secondary">{{ ctrl.framework.short_name }}</span>
+            </td>
+            <td>
+              <small class="text-muted2">{{ ctrl.get_control_category_display }}</small>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-1">
+                <div class="progress flex-grow-1" style="height:4px;width:40px;background:rgba(255,255,255,.1);">
+                  <div class="progress-bar bg-info" style="width:{{ ctrl.weight|floatformat:0 }}00%;"></div>
+                </div>
+                <small>{{ ctrl.weight }}</small>
+              </div>
+            </td>
+            <td class="text-center">
+              {% if ctrl.automated_check %}
+              <i class="fa-solid fa-robot text-cyber" title="Automated check"></i>
+              {% else %}
+              <i class="fa-solid fa-user-pen text-muted2" title="Manual check"></i>
+              {% endif %}
+            </td>
+            <td>
+              {% if ctrl.latest_result %}
+              <span class="badge {{ ctrl.latest_result.get_status_badge_class }}">
+                {{ ctrl.latest_result.get_status_display }}
+              </span>
+              {% else %}
+              <span class="badge bg-secondary">No Data</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if ctrl.latest_result %}
+              <span style="font-weight:600;font-size:.85rem;color:
+                {% if ctrl.latest_result.score >= 80 %}var(--hs-health-grn)
+                {% elif ctrl.latest_result.score >= 50 %}var(--hs-warning)
+                {% else %}var(--hs-danger){% endif %};">
+                {{ ctrl.latest_result.score|floatformat:0 }}%
+              </span>
+              {% else %}
+              <small class="text-muted2">—</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if ctrl.latest_result %}
+              <small class="text-muted2" title="{{ ctrl.latest_result.checked_at|date:'Y-m-d H:i' }}">
+                {{ ctrl.latest_result.checked_at|timesince }} ago
+              </small>
+              {% else %}
+              <small class="text-muted2">Never</small>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center text-muted2 py-5">
+              <i class="fa-solid fa-list-check fa-2x mb-2 d-block text-cyber"></i>
+              No controls found. Run <strong>seed_compliance_data</strong> to load frameworks.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}&framework={{ f_framework }}&category={{ f_category }}&status={{ f_status }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}&framework={{ f_framework }}&category={{ f_category }}&status={{ f_status }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

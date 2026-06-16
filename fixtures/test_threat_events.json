@@ -1,0 +1,189 @@
+[
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 1,
+    "fields": {
+      "threat_id": "THREAT-2026-001",
+      "affected_system": 1,
+      "threat_type": "MALWARE",
+      "severity": "CRITICAL",
+      "description": "Ransomware detected on network segment",
+      "indicators": {
+        "file_hash": ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "ip_address": ["192.168.1.100", "10.0.0.50"]
+      },
+      "status": "OPEN",
+      "detected_at": "2026-05-20T14:30:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 2,
+    "fields": {
+      "threat_id": "THREAT-2026-002",
+      "affected_system": 1,
+      "threat_type": "INTRUSION_ATTEMPT",
+      "severity": "HIGH",
+      "description": "Multiple failed login attempts from external IP",
+      "indicators": {
+        "ip_address": ["203.0.113.42"],
+        "protocol": "SSH"
+      },
+      "status": "INVESTIGATING",
+      "detected_at": "2026-05-22T09:15:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 3,
+    "fields": {
+      "threat_id": "THREAT-2026-003",
+      "affected_system": 1,
+      "threat_type": "DATA_EXFILTRATION",
+      "severity": "CRITICAL",
+      "description": "Unusual outbound traffic to unknown IP detected",
+      "indicators": {
+        "ip_address": ["198.51.100.89"],
+        "bytes_transferred": 5368709120,
+        "protocols": ["HTTPS", "TOR"]
+      },
+      "status": "OPEN",
+      "detected_at": "2026-05-23T16:45:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 4,
+    "fields": {
+      "threat_id": "THREAT-2026-004",
+      "affected_system": 1,
+      "threat_type": "PRIVILEGE_ESCALATION",
+      "severity": "HIGH",
+      "description": "Unauthorized privilege escalation attempt detected",
+      "indicators": {
+        "user": "service_account",
+        "target_privilege": "ADMIN",
+        "command": "sudo su -"
+      },
+      "status": "RESOLVED",
+      "detected_at": "2026-05-19T11:20:00Z",
+      "assigned_to": null
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 5,
+    "fields": {
+      "threat_id": "THREAT-2026-005",
+      "affected_system": 1,
+      "threat_type": "COMMAND_CONTROL",
+      "severity": "CRITICAL",
+      "description": "Command and Control communication detected",
+      "indicators": {
+        "domain": "malicious.example.com",
+        "ip_address": ["198.51.100.45"],
+        "port": 443
+      },
+      "status": "INVESTIGATING",
+      "detected_at": "2026-05-21T13:00:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 6,
+    "fields": {
+      "threat_id": "THREAT-2026-006",
+      "affected_system": 1,
+      "threat_type": "POLICY_VIOLATION",
+      "severity": "MEDIUM",
+      "description": "Policy violation: unsecured USB device connected",
+      "indicators": {
+        "device_type": "USB_DRIVE",
+        "vendor": "Unknown"
+      },
+      "status": "RESOLVED",
+      "detected_at": "2026-05-18T10:30:00Z",
+      "assigned_to": null
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 7,
+    "fields": {
+      "threat_id": "THREAT-2026-007",
+      "affected_system": 1,
+      "threat_type": "VULNERABILITY_EXPLOIT",
+      "severity": "HIGH",
+      "description": "Exploitation attempt for CVE-2024-1234",
+      "indicators": {
+        "cve": "CVE-2024-1234",
+        "target": "Apache 2.4.49",
+        "payload": "RCE"
+      },
+      "status": "OPEN",
+      "detected_at": "2026-05-24T08:45:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 8,
+    "fields": {
+      "threat_id": "THREAT-2026-008",
+      "affected_system": 1,
+      "threat_type": "ANOMALOUS_BEHAVIOR",
+      "severity": "MEDIUM",
+      "description": "User accessing records outside normal pattern",
+      "indicators": {
+        "user_id": 5,
+        "access_hour": 3,
+        "records_accessed": 150
+      },
+      "status": "OPEN",
+      "detected_at": "2026-05-25T03:30:00Z",
+      "assigned_to": null
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 9,
+    "fields": {
+      "threat_id": "THREAT-2026-009",
+      "affected_system": 1,
+      "threat_type": "MISCONFIGURATION",
+      "severity": "HIGH",
+      "description": "Public S3 bucket with sensitive data discovered",
+      "indicators": {
+        "resource": "s3://healthsec-backups",
+        "acl": "PUBLIC_READ",
+        "size_gb": 500
+      },
+      "status": "INVESTIGATING",
+      "detected_at": "2026-05-20T15:20:00Z",
+      "assigned_to": 2
+    }
+  },
+  {
+    "model": "risk_engine.threatevent",
+    "pk": 10,
+    "fields": {
+      "threat_id": "THREAT-2026-010",
+      "affected_system": 1,
+      "threat_type": "LATERAL_MOVEMENT",
+      "severity": "CRITICAL",
+      "description": "Lateral movement detected within internal network",
+      "indicators": {
+        "source_ip": "192.168.1.15",
+        "target_ips": ["192.168.1.20", "192.168.1.25", "10.0.0.1"],
+        "techniques": ["PASS_THE_HASH", "PSEXEC"]
+      },
+      "status": "OPEN",
+      "detected_at": "2026-05-25T12:00:00Z",
+      "assigned_to": 2
+    }
+  }
+]

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Report Generated</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #06d6a0 0%, #048a6f 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { background: #f8f9fa; padding: 20px; border-left: 4px solid #06d6a0; }
+        .detail-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .detail-table th { text-align: left; padding: 10px; background: #e9ecef; font-weight: 600; font-size: 12px; text-transform: uppercase; color: #666; }
+        .detail-table td { padding: 10px; border-bottom: 1px solid #e0e0e0; }
+        .detail-table tr:last-child td { border-bottom: none; }
+        .label { font-weight: 600; color: #048a6f; width: 30%; }
+        .value { color: #555; }
+        .score-display { background: white; padding: 20px; border-radius: 4px; text-align: center; margin: 15px 0; }
+        .score-value { font-size: 48px; font-weight: bold; color: #06d6a0; }
+        .score-label { font-size: 14px; color: #666; text-transform: uppercase; }
+        .cta-button { display: inline-block; background: #06d6a0; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: 600; margin-top: 15px; }
+        .cta-button:hover { background: #048a6f; }
+        .footer { background: #f0f0f0; padding: 15px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Compliance Report Generated</h1>
+        </div>
+
+        <div class="content">
+            <h2 style="margin-top: 0; color: #048a6f;">Compliance Assessment Complete</h2>
+
+            <p>A new compliance report has been generated and is ready for review.</p>
+
+            <table class="detail-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Report Information</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label">Report Type</td>
+                        <td class="value">{{ report.report_type }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Generated</td>
+                        <td class="value">{{ report.created_at|date:"Y-m-d H:i:s" }} WAT</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Status</td>
+                        <td class="value">{{ report.get_status_display }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if report.compliance_score %}
+            <div class="score-display">
+                <div class="score-label">Overall Compliance Score</div>
+                <div class="score-value">{{ report.compliance_score }}%</div>
+            </div>
+            {% endif %}
+
+            <h3 style="color: #048a6f;">Next Steps</h3>
+            <ul style="background: white; padding: 15px; border-radius: 4px;">
+                <li>Review the full report in the HealthSec dashboard</li>
+                <li>Identify any non-compliant frameworks or controls</li>
+                <li>Plan remediation for identified gaps</li>
+                <li>Schedule follow-up assessments as needed</li>
+            </ul>
+
+            <a href="{{ report_url }}" class="cta-button">View Full Report →</a>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated notification from <strong>{{ site_name }}</strong>.</p>
+            <p>Do not reply to this email. For support, contact your system administrator.</p>
+        </div>
+    </div>
+</body>
+</html>

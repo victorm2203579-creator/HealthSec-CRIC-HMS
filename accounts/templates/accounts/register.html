@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block page_title %}Register User — HealthSec{% endblock %}
+{% block page_header %}Register New User{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7">
+    <div class="hs-card">
+      <div class="hs-card-body">
+        <h6 class="text-white fw-bold mb-4"><i class="fa-solid fa-user-plus me-2 text-cyber"></i>New User Account</h6>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div style="color:var(--hs-danger);font-size:0.8rem;">{{ field.errors.0 }}</div>{% endif %}
+            {% if field.help_text %}<div class="text-muted2" style="font-size:0.75rem;margin-top:0.25rem;">{{ field.help_text }}</div>{% endif %}
+          </div>
+          {% endfor %}
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-hs-primary">Create User</button>
+            <a href="{% url 'accounts:user_list' %}" class="btn btn-hs-outline">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

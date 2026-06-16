@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — HealthSec CRIC HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dash-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 1100px) { .dash-kpi-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 600px)  { .dash-kpi-grid { grid-template-columns: 1fr; } }
+
+  .dash-kpi {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-left: 4px solid transparent;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .dash-kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+  .dash-kpi-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .dash-kpi-icon svg { width: 22px; height: 22px; stroke: #fff; }
+
+  .dash-kpi-val {
+    font-size: 2rem; font-weight: 800; line-height: 1;
+    margin-bottom: 3px;
+  }
+  .dash-kpi-label {
+    font-size: 0.73rem; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+    margin-bottom: 5px;
+  }
+  .dash-kpi-sub { font-size: 0.75rem; color: #9ca3af; }
+
+  /* KPI accent colours */
+  .kpi-purple  { border-color: #5b47fb; }
+  .kpi-red     { border-color: #ef4444; }
+  .kpi-green   { border-color: #10b981; }
+  .kpi-amber   { border-color: #f59e0b; }
+  .kpi-blue    { border-color: #3b82f6; }
+  .kpi-teal    { border-color: #14b8a6; }
+  .kpi-orange  { border-color: #f97316; }
+  .kpi-indigo  { border-color: #6366f1; }
+
+  .kpi-purple  .dash-kpi-icon { background: linear-gradient(135deg,#5b47fb,#7c6dfc); }
+  .kpi-red     .dash-kpi-icon { background: linear-gradient(135deg,#ef4444,#f87171); }
+  .kpi-green   .dash-kpi-icon { background: linear-gradient(135deg,#10b981,#34d399); }
+  .kpi-amber   .dash-kpi-icon { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+  .kpi-blue    .dash-kpi-icon { background: linear-gradient(135deg,#3b82f6,#60a5fa); }
+  .kpi-teal    .dash-kpi-icon { background: linear-gradient(135deg,#14b8a6,#2dd4bf); }
+  .kpi-orange  .dash-kpi-icon { background: linear-gradient(135deg,#f97316,#fb923c); }
+  .kpi-indigo  .dash-kpi-icon { background: linear-gradient(135deg,#6366f1,#818cf8); }
+
+  .kpi-purple  .dash-kpi-val { color: #5b47fb; }
+  .kpi-red     .dash-kpi-val { color: #ef4444; }
+  .kpi-green   .dash-kpi-val { color: #10b981; }
+  .kpi-amber   .dash-kpi-val { color: #f59e0b; }
+  .kpi-blue    .dash-kpi-val { color: #3b82f6; }
+  .kpi-teal    .dash-kpi-val { color: #14b8a6; }
+  .kpi-orange  .dash-kpi-val { color: #f97316; }
+  .kpi-indigo  .dash-kpi-val { color: #6366f1; }
+
+  .chart-wrap { position: relative; height: 240px; }
+
+  .hs-feed-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .hs-feed-row:last-child { border-bottom: none; }
+  .hs-feed-dot {
+    width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+  }
+  .hs-feed-title { font-size: 0.845rem; font-weight: 600; color: #1a1f2e; }
+  .hs-feed-meta  { font-size: 0.74rem; color: #9ca3af; margin-top: 2px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div>
+    <h1><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Security Operations</h1>
+    <p class="text-muted2 mb-0">Real-time cyber risk intelligence &amp; compliance — HealthSec CRIC HMS</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'reports:generate_risk' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-file-pdf me-1"></i> Risk Report
+    </a>
+    <a href="{% url 'risk_engine:generate_assessment' %}" class="btn btn-sm btn-hs-primary">
+      <i class="fa-solid fa-rotate me-1"></i> Run Assessment
+    </a>
+  </div>
+</div>
+
+<!-- ── KPI Grid Row 1 ──────────────────────────────────────────── -->
+<div class="dash-kpi-grid">
+
+  <div class="dash-kpi kpi-orange">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Threats Today</div>
+      <div class="dash-kpi-val">{{ total_threats_today }}</div>
+      <div class="dash-kpi-sub"><i class="fa-solid fa-circle-dot" style="color:#10b981;font-size:.6rem;"></i> Actively monitored</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-red">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Critical Alerts</div>
+      <div class="dash-kpi-val">{{ critical_alerts_open }}</div>
+      <div class="dash-kpi-sub">Open / unresolved</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-green">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Compliance Score</div>
+      <div class="dash-kpi-val">{{ compliance_score }}%</div>
+      <div class="dash-kpi-sub">HIPAA · NDPR · ISO 27001</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-purple">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Open Incidents</div>
+      <div class="dash-kpi-val">{{ total_incidents_open }}</div>
+      <div class="dash-kpi-sub">Active response</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── KPI Grid Row 2 ──────────────────────────────────────────── -->
+<div class="dash-kpi-grid" style="margin-top:-8px;">
+
+  <div class="dash-kpi kpi-amber">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Suspicious Access</div>
+      <div class="dash-kpi-val">{{ suspicious_activities_today }}</div>
+      <div class="dash-kpi-sub">Flagged events today</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-blue">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Active Users</div>
+      <div class="dash-kpi-val">{{ active_users_today }}</div>
+      <div class="dash-kpi-sub">Logged in today</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-teal">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Open Vulnerabilities</div>
+      <div class="dash-kpi-val">{{ vulnerabilities_open }}</div>
+      <div class="dash-kpi-sub">Unpatched / open</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi kpi-indigo">
+    <div class="dash-kpi-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+    </div>
+    <div>
+      <div class="dash-kpi-label">Healthcare Systems</div>
+      <div class="dash-kpi-val">{{ total_systems }}</div>
+      <div class="dash-kpi-sub">
+        {% if monitoring_active %}<i class="fa-solid fa-circle" style="color:#10b981;font-size:.6rem;"></i> Monitoring active{% else %}<i class="fa-solid fa-circle" style="color:#ef4444;font-size:.6rem;"></i> Offline{% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts ──────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-lg-8">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-line me-2 text-cyber"></i>Threat Activity Timeline</span>
+        <a href="{% url 'monitoring:event_list' %}" class="btn btn-xs btn-hs-outline">View All</a>
+      </div>
+      <div class="hs-card-body">
+        <div class="chart-wrap"><canvas id="chartThreatTimeline"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-pie me-2 text-cyber"></i>Alert Severity</span>
+      </div>
+      <div class="hs-card-body d-flex align-items-center justify-content-center">
+        <canvas id="chartSeverity" height="200" style="max-width:220px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Tables ──────────────────────────────────────────────────── -->
+<div class="row g-3">
+
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-bell me-2" style="color:#ef4444;"></i>Recent Critical Alerts</span>
+        <a href="{% url 'alerts:alert_list' %}" class="btn btn-xs btn-hs-outline">View All</a>
+      </div>
+      <div class="hs-card-body p-0">
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead>
+              <tr><th>Alert</th><th>Severity</th><th>Status</th><th>When</th></tr>
+            </thead>
+            <tbody>
+              {% for alert in recent_alerts %}
+              <tr>
+                <td>
+                  <a href="{% url 'alerts:alert_detail' alert.pk %}" style="color:#5b47fb;font-weight:600;font-size:.85rem;">
+                    {{ alert.alert_type|default:alert.title|truncatechars:28 }}
+                  </a>
+                  {% if alert.affected_system %}
+                  <small class="text-muted2 d-block">{{ alert.affected_system.name }}</small>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge
+                    {% if alert.severity == 'CRITICAL' %}badge-critical
+                    {% elif alert.severity == 'HIGH' %}badge-high
+                    {% elif alert.severity == 'MEDIUM' %}badge-medium
+                    {% else %}badge-low{% endif %}">
+                    {{ alert.severity }}
+                  </span>
+                </td>
+                <td><small class="text-muted2">{{ alert.status }}</small></td>
+                <td><small class="text-muted2">{{ alert.created_at|timesince }} ago</small></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted2 py-4">No alerts on record</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-clipboard-list me-2 text-cyber"></i>Recent Audit Events</span>
+        <a href="{% url 'audit:log_list' %}" class="btn btn-xs btn-hs-outline">View All</a>
+      </div>
+      <div class="hs-card-body p-0">
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead>
+              <tr><th>User</th><th>Action</th><th>When</th></tr>
+            </thead>
+            <tbody>
+              {% for event in recent_events %}
+              <tr>
+                <td><span class="fw-semibold" style="font-size:.85rem;">{{ event.user.username|default:"System" }}</span></td>
+                <td>
+                  <span style="font-size:.82rem;color:#374151;">{{ event.action }}</span>
+                  {% if event.description %}
+                  <small class="text-muted2 d-block">{{ event.description|truncatechars:40 }}</small>
+                  {% endif %}
+                </td>
+                <td><small class="text-muted2">{{ event.timestamp|timesince }} ago</small></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted2 py-4">No recent audit events</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  'use strict';
+
+  // ── Threat Activity Timeline ──────────────────────────────
+  var timelineCtx = document.getElementById('chartThreatTimeline');
+  if (timelineCtx) {
+    fetch('/dashboard/api/threat-timeline/')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var ctx2d = timelineCtx.getContext('2d');
+        var grad = ctx2d.createLinearGradient(0, 0, 0, 220);
+        grad.addColorStop(0, 'rgba(91,71,251,0.22)');
+        grad.addColorStop(1, 'rgba(91,71,251,0.00)');
+
+        new Chart(timelineCtx, {
+          type: 'line',
+          data: {
+            labels: d.labels,
+            datasets: [{
+              label: 'Monitoring Events',
+              data: d.data,
+              borderColor: '#5b47fb',
+              backgroundColor: grad,
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: '#5b47fb',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointHoverRadius: 6,
+              fill: true,
+              tension: 0.42
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(15,20,40,0.92)',
+                titleColor: '#e2e8f0',
+                bodyColor: '#94a3b8',
+                borderColor: 'rgba(91,71,251,0.4)',
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: function(item){ return '  Events: ' + item.raw; }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                ticks: { font: { size: 11 }, color: '#9ca3af', maxTicksLimit: 10 }
+              },
+              y: {
+                grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+                ticks: { font: { size: 11 }, color: '#9ca3af', precision: 0 },
+                beginAtZero: true
+              }
+            }
+          }
+        });
+      }).catch(function(){});
+  }
+
+  // ── Alert Severity Doughnut ───────────────────────────────
+  var sevCtx = document.getElementById('chartSeverity');
+  if (sevCtx) {
+    fetch('/dashboard/api/severity-distribution/')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var total = (d.LOW||0)+(d.MEDIUM||0)+(d.HIGH||0)+(d.CRITICAL||0);
+        new Chart(sevCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Low', 'Medium', 'High', 'Critical'],
+            datasets: [{
+              data: [d.LOW||0, d.MEDIUM||0, d.HIGH||0, d.CRITICAL||0],
+              backgroundColor: ['#10b981','#f59e0b','#f97316','#ef4444'],
+              borderColor: 'transparent',
+              hoverOffset: 6,
+              borderRadius: 4,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { size: 11 }, boxWidth: 10, boxHeight: 10, color: '#6b7280', padding: 12 }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(15,20,40,0.92)',
+                titleColor: '#e2e8f0',
+                bodyColor: '#94a3b8',
+                borderColor: 'rgba(91,71,251,0.4)',
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: function(item){
+                    var pct = total > 0 ? ((item.raw/total)*100).toFixed(1) : 0;
+                    return '  '+item.label+': '+item.raw+' ('+pct+'%)';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }).catch(function(){});
+  }
+})();
+</script>
+{% endblock %}

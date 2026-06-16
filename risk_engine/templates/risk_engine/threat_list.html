@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Threat Events{% endblock %}
+{% block page_title %}Threat Event Monitor{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-bolt me-2 text-danger"></i>Threat Events</h1>
+    <p class="text-muted2 mb-0">{{ total_count }} event{{ total_count|pluralize }} total</p>
+  </div>
+  <a href="{% url 'risk_engine:risk_dashboard' %}" class="btn btn-sm btn-hs-outline">
+    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+  </a>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-4">
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label class="form-label-sm text-muted2">Threat Type</label>
+        <select name="threat_type" class="form-select form-select-sm hs-input">
+          <option value="">All Types</option>
+          {% for val, label in threat_type_choices %}
+          <option value="{{ val }}" {% if f_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label-sm text-muted2">Severity</label>
+        <select name="severity" class="form-select form-select-sm hs-input">
+          <option value="">All</option>
+          {% for val, label in severity_choices %}
+          <option value="{{ val }}" {% if f_severity == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label-sm text-muted2">Status</label>
+        <select name="status" class="form-select form-select-sm hs-input">
+          <option value="">All</option>
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if f_status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label-sm text-muted2">From</label>
+        <input type="date" name="date_from" value="{{ f_from }}" class="form-control form-control-sm hs-input">
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label-sm text-muted2">To</label>
+        <input type="date" name="date_to" value="{{ f_to }}" class="form-control form-control-sm hs-input">
+      </div>
+      <div class="col-12 col-lg-2 d-flex gap-2">
+        <button type="submit" class="btn btn-sm btn-hs-primary flex-grow-1">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+        <a href="{% url 'risk_engine:threat_event_list' %}" class="btn btn-sm btn-hs-outline">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Inline Status Update (analysts) ── #}
+{% if request.user.is_analyst %}
+<div id="statusUpdateBar" class="d-none mb-3">
+  <form method="post" class="d-flex gap-2 align-items-center flex-wrap">
+    {% csrf_token %}
+    <input type="hidden" name="event_id" id="updateEventId">
+    <small class="text-muted2">Update status for event <strong id="updateEventLabel"></strong>:</small>
+    {% for val, label in status_choices %}
+    <button type="submit" name="status" value="{{ val }}"
+            class="btn btn-xs {% if val == 'OPEN' %}btn-hs-danger{% elif val == 'INVESTIGATING' %}badge-medium text-dark border-0{% elif val == 'MITIGATED' %}btn-hs-primary{% else %}btn-hs-outline{% endif %}">
+      {{ label }}
+    </button>
+    {% endfor %}
+    <button type="button" class="btn btn-xs btn-hs-outline" onclick="document.getElementById('statusUpdateBar').classList.add('d-none')">Cancel</button>
+  </form>
+</div>
+{% endif %}
+
+{# ── Events Table ── #}
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Target</th>
+            <th>Source IP</th>
+            <th>Detected</th>
+            <th>Status</th>
+            <th>Assigned</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for evt in page_obj %}
+          <tr>
+            <td>
+              <small class="fw-semibold">{{ evt.get_threat_type_display }}</small>
+            </td>
+            <td>
+              <span class="badge {{ evt.get_severity_badge_class }}">{{ evt.get_severity_display }}</span>
+            </td>
+            <td class="text-truncate" style="max-width:160px;">
+              <small>{{ evt.target_resource }}</small>
+            </td>
+            <td>
+              <small class="font-monospace text-muted2">{{ evt.source_ip|default:"—" }}</small>
+            </td>
+            <td>
+              <small class="text-muted2" title="{{ evt.detected_at|date:'Y-m-d H:i' }}">
+                {{ evt.detected_at|timesince }} ago
+              </small>
+            </td>
+            <td>
+              <span class="badge {{ evt.get_status_badge_class }}">{{ evt.get_status_display }}</span>
+            </td>
+            <td>
+              <small class="text-muted2">{{ evt.assigned_to.username|default:"—" }}</small>
+            </td>
+            <td class="text-end">
+              <div class="d-flex gap-1 justify-content-end">
+                <a href="{% url 'risk_engine:threat_event_detail' evt.pk %}"
+                   class="btn btn-xs btn-hs-outline" title="View detail">
+                  <i class="fa-solid fa-eye"></i>
+                </a>
+                {% if request.user.is_analyst %}
+                <button class="btn btn-xs btn-hs-outline" title="Quick status update"
+                        onclick="showStatusBar('{{ evt.pk }}', '{{ evt.get_threat_type_display|escapejs }}')">
+                  <i class="fa-solid fa-edit"></i>
+                </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted2 py-5">
+              <i class="fa-solid fa-circle-check fa-2x mb-2 d-block" style="color:var(--hs-health-grn);"></i>
+              No threat events match the current filters.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}&threat_type={{ f_type }}&severity={{ f_severity }}&status={{ f_status }}&date_from={{ f_from }}&date_to={{ f_to }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}&threat_type={{ f_type }}&severity={{ f_severity }}&status={{ f_status }}&date_from={{ f_from }}&date_to={{ f_to }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showStatusBar(eventId, label) {
+  document.getElementById('updateEventId').value = eventId;
+  document.getElementById('updateEventLabel').textContent = label;
+  document.getElementById('statusUpdateBar').classList.remove('d-none');
+  document.getElementById('statusUpdateBar').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+{% endblock %}

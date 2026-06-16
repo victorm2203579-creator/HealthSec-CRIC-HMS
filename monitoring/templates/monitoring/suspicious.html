@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Suspicious Activity{% endblock %}
+{% block page_title %}Suspicious Activity{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+  <div>
+    <h1><i class="fa-solid fa-triangle-exclamation me-2" style="color:var(--hs-danger);"></i>Suspicious Activity</h1>
+    <p class="text-muted2 mb-0">
+      Anomalous access events flagged by the monitoring engine &mdash;
+      <strong style="color:var(--hs-danger);">{{ unresolved_count }} unresolved</strong>
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-gauge me-1"></i> Dashboard
+    </a>
+  </div>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-3">
+  <div class="hs-card-header">
+    <span class="hs-card-title"><i class="fa-solid fa-filter me-2"></i>Filters</span>
+    {% if filter_resolved or filter_severity or filter_type %}
+      <a href="{% url 'monitoring:suspicious_activity_list' %}" class="btn btn-sm btn-hs-outline">
+        <i class="fa-solid fa-xmark me-1"></i>Clear
+      </a>
+    {% endif %}
+  </div>
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select name="resolved" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="no" {% if filter_resolved == 'no' %}selected{% endif %}>Unresolved</option>
+          <option value="yes" {% if filter_resolved == 'yes' %}selected{% endif %}>Resolved</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Severity</label>
+        <select name="severity" class="form-select form-select-sm">
+          <option value="">All Severities</option>
+          {% for val, label in severity_choices %}
+            <option value="{{ val }}" {% if filter_severity == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Activity Type</label>
+        <select name="activity_type" class="form-select form-select-sm">
+          <option value="">All Types</option>
+          {% for val, label in activity_type_choices %}
+            <option value="{{ val }}" {% if filter_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-hs-primary btn-sm w-100">
+          <i class="fa-solid fa-search me-1"></i>Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Activity Cards ── #}
+{% for activity in page_obj %}
+<div class="hs-card mb-3 {% if not activity.resolved and activity.severity == 'CRITICAL' %}glow-danger{% endif %}">
+  <div class="hs-card-header">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <span class="badge {{ activity.get_severity_badge_class }} fs-6" style="font-size:.8rem!important;">
+        {{ activity.severity }}
+      </span>
+      <strong style="color:#fff;">{{ activity.get_activity_type_display }}</strong>
+      <small class="text-muted2">
+        <i class="fa-regular fa-clock me-1"></i>{{ activity.timestamp|date:"Y-m-d H:i" }}
+      </small>
+      {% if not activity.resolved %}
+        <span class="badge bg-warning text-dark ms-auto">
+          <i class="fa-solid fa-circle-dot me-1"></i>Unresolved
+        </span>
+      {% else %}
+        <span class="badge badge-low ms-auto">
+          <i class="fa-solid fa-circle-check me-1"></i>Resolved
+        </span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hs-card-body">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <p class="mb-2" style="color:var(--hs-text);">{{ activity.description }}</p>
+        <div class="d-flex gap-3 flex-wrap">
+          {% if activity.user %}
+          <span class="text-muted2 small">
+            <i class="fa-solid fa-user me-1"></i>
+            {{ activity.user.username }}
+          </span>
+          {% endif %}
+          {% if activity.related_record %}
+          <span class="text-muted2 small">
+            <i class="fa-solid fa-file-medical me-1"></i>
+            {{ activity.related_record.patient_code }}
+          </span>
+          {% endif %}
+        </div>
+        {% if activity.resolved %}
+        <div class="mt-2 small text-muted2">
+          <i class="fa-solid fa-user-check me-1"></i>
+          Resolved by {{ activity.resolved_by.username|default:"system" }}
+          on {{ activity.resolved_at|date:"Y-m-d H:i" }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-md-4 d-flex align-items-start justify-content-end">
+        {% if not activity.resolved and request.user.is_analyst %}
+        <form method="post" action="{% url 'monitoring:resolve_suspicious' activity.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-hs-success btn-sm">
+            <i class="fa-solid fa-circle-check me-1"></i> Mark Resolved
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="hs-card">
+  <div class="hs-card-body text-center py-5 text-muted2">
+    <i class="fa-solid fa-shield-halved fa-3x mb-3" style="color:var(--hs-health-grn);"></i>
+    <p class="mb-0">No suspicious activities match the current filters.</p>
+  </div>
+</div>
+{% endfor %}
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<div class="d-flex justify-content-center mt-3">
+  <nav>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" style="background:var(--hs-navy);border-color:var(--hs-border);color:var(--hs-text);"
+             href="?page={{ page_obj.previous_page_number }}&resolved={{ filter_resolved }}&severity={{ filter_severity }}&activity_type={{ filter_type }}">
+            &laquo;
+          </a>
+        </li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active">
+            <span class="page-link" style="background:var(--hs-cyber-blue);border-color:var(--hs-cyber-blue);color:var(--hs-navy);">{{ num }}</span>
+          </li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item">
+            <a class="page-link" style="background:var(--hs-navy);border-color:var(--hs-border);color:var(--hs-text);"
+               href="?page={{ num }}&resolved={{ filter_resolved }}&severity={{ filter_severity }}&activity_type={{ filter_type }}">
+              {{ num }}
+            </a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" style="background:var(--hs-navy);border-color:var(--hs-border);color:var(--hs-text);"
+             href="?page={{ page_obj.next_page_number }}&resolved={{ filter_resolved }}&severity={{ filter_severity }}&activity_type={{ filter_type }}">
+            &raquo;
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endif %}
+{% endblock %}

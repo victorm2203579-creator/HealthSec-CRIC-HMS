@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Alert Dashboard{% endblock %}
+{% block page_title %}Alert & Incident Dashboard{% endblock %}
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-bell me-2 text-cyber"></i>Alert Dashboard</h1>
+    <p class="text-muted2 mb-0">Last 30 days of alert and incident activity</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'alerts:alert_list' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-list me-1"></i> View All Alerts
+    </a>
+    <a href="{% url 'alerts:incident_list' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-shield-halved me-1"></i> View Incidents
+    </a>
+  </div>
+</div>
+
+{# ── KPI Cards ── #}
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="hs-card">
+      <div class="hs-card-body text-center">
+        <div style="font-size:2rem;font-weight:700;color:var(--hs-cyber);">{{ stats.total_alerts }}</div>
+        <small class="text-muted2">Total Alerts</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="hs-card">
+      <div class="hs-card-body text-center">
+        <div style="font-size:2rem;font-weight:700;color:#ff006e;">{{ stats.open_alerts }}</div>
+        <small class="text-muted2">Open Alerts</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="hs-card">
+      <div class="hs-card-body text-center">
+        <div style="font-size:2rem;font-weight:700;color:var(--hs-warning);">{{ stats.total_incidents }}</div>
+        <small class="text-muted2">Total Incidents</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="hs-card">
+      <div class="hs-card-body text-center">
+        <div style="font-size:2rem;font-weight:700;color:var(--hs-health-grn);">{{ stats.open_incidents }}</div>
+        <small class="text-muted2">Open Incidents</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Severity Breakdown ── #}
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-triangle-exclamation me-2 text-cyber"></i>Alerts by Severity</span>
+      </div>
+      <div class="hs-card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span>Critical</span>
+          <strong style="color:#ff006e;">{{ stats.alerts_by_severity.critical }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>High</span>
+          <strong style="color:var(--hs-danger);">{{ stats.alerts_by_severity.high }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span>Medium</span>
+          <strong style="color:var(--hs-warning);">{{ stats.alerts_by_severity.medium }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Low</span>
+          <strong style="color:var(--hs-health-grn);">{{ stats.alerts_by_severity.low }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-bar me-2 text-cyber"></i>Alerts by Status</span>
+      </div>
+      <div class="hs-card-body">
+        <div class="d-flex justify-content-between mb-2">
+          <span><i class="fa-solid fa-circle-dot" style="color:#4a86e8;"></i> New</span>
+          <strong>{{ stats.alerts_by_status.new }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span><i class="fa-solid fa-circle-dot" style="color:var(--hs-warning);"></i> Acknowledged</span>
+          <strong>{{ stats.alerts_by_status.acknowledged }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <span><i class="fa-solid fa-circle-dot" style="color:#6d9eeb;"></i> In Progress</span>
+          <strong>{{ stats.alerts_by_status.in_progress }}</strong>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span><i class="fa-solid fa-circle-dot" style="color:var(--hs-health-grn);"></i> Resolved</span>
+          <strong>{{ stats.alerts_by_status.resolved }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Open Alerts & Incidents ── #}
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-exclamation-circle me-2 text-cyber"></i>Top Open Alerts</span>
+      </div>
+      <div class="hs-card-body p-0">
+        {% if open_alerts %}
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead><tr><th>Title</th><th>Severity</th><th>System</th></tr></thead>
+            <tbody>
+              {% for alert in open_alerts %}
+              <tr>
+                <td><a href="{% url 'alerts:alert_detail' alert.pk %}" class="text-cyber">{{ alert.title|truncatechars:40 }}</a></td>
+                <td>
+                  <span class="badge {% if alert.severity == 'CRITICAL' %}bg-danger{% elif alert.severity == 'HIGH' %}badge-high{% elif alert.severity == 'MEDIUM' %}badge-medium{% else %}badge-low{% endif %}">
+                    {{ alert.severity }}
+                  </span>
+                </td>
+                <td><small class="text-muted2">{{ alert.affected_system.name|default:"System-wide" }}</small></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted2 mb-0">No open alerts</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Active Incidents</span>
+      </div>
+      <div class="hs-card-body p-0">
+        {% if open_incidents %}
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead><tr><th>Incident</th><th>Phase</th><th>Commander</th></tr></thead>
+            <tbody>
+              {% for incident in open_incidents %}
+              <tr>
+                <td><a href="{% url 'alerts:incident_detail' incident.pk %}" class="text-cyber">{{ incident.incident_number }}</a></td>
+                <td><span class="badge badge-medium">{{ incident.get_phase_display }}</span></td>
+                <td><small class="text-muted2">{{ incident.incident_commander.username|default:"Unassigned" }}</small></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted2 mb-0">No active incidents</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

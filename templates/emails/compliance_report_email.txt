@@ -1,0 +1,27 @@
+COMPLIANCE REPORT GENERATED
+==============================================================
+
+A new compliance report has been generated and is ready for review.
+
+Report Details:
+  Type:       {{ report.report_type }}
+  Generated:  {{ report.created_at|date:"Y-m-d H:i:s" }} WAT
+  Status:     {{ report.get_status_display }}
+
+{% if report.compliance_score %}
+Compliance Score: {{ report.compliance_score }}%
+{% endif %}
+
+Next Steps:
+  1. Review the full report in the HealthSec dashboard
+  2. Identify any non-compliant frameworks or controls
+  3. Plan remediation for identified gaps
+  4. Schedule follow-up assessments as needed
+
+View the full report:
+{{ report_url }}
+
+==============================================================
+This is an automated notification from {{ site_name }}.
+Do not reply to this email. For support, contact your system
+administrator.

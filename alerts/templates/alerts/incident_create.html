@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Create Incident{% endblock %}
+{% block page_title %}Create New Incident{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{% url 'alerts:incident_list' %}" class="btn btn-xs btn-hs-outline mb-2">
+    <i class="fa-solid fa-arrow-left me-1"></i> Back to Incidents
+  </a>
+  <h1><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Create New Incident</h1>
+  <p class="text-muted2">Group related alerts into a formal incident for coordinated response</p>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <form method="post" class="hs-card">
+      {% csrf_token %}
+
+      {# ── Basic Info ── #}
+      <div class="hs-card-header">
+        <span class="hs-card-title">Incident Information</span>
+      </div>
+      <div class="hs-card-body border-bottom" style="border-color:var(--hs-border)!important;">
+        <div class="mb-3">
+          <label class="form-label">Incident Title *</label>
+          <input type="text" name="title" class="form-control" placeholder="Brief title for this incident..." required>
+          <small class="text-muted2">Examples: "Unauthorized access to EHR", "SQL injection attempt", "Data exfiltration risk"</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Description *</label>
+          <textarea name="description" class="form-control" rows="4" placeholder="Detailed description of the incident..." required></textarea>
+          <small class="text-muted2">Include context, affected systems, and impact assessment</small>
+        </div>
+      </div>
+
+      {# ── Select Alerts ── #}
+      <div class="hs-card-header border-top" style="border-color:var(--hs-border)!important;">
+        <span class="hs-card-title">Related Alerts</span>
+      </div>
+      <div class="hs-card-body">
+        {% if open_alerts %}
+        <div class="alert-selection">
+          {% for alert in open_alerts %}
+          <div class="form-check mb-2 p-2" style="background:var(--hs-bg-dark);border:1px solid var(--hs-border);border-radius:var(--hs-border-radius);">
+            <input type="checkbox" name="alert_ids" value="{{ alert.pk }}" class="form-check-input" id="alert_{{ alert.pk }}">
+            <label class="form-check-label w-100" for="alert_{{ alert.pk }}" style="cursor:pointer;">
+              <strong>{{ alert.title|truncatechars:60 }}</strong>
+              <div style="margin-top:0.25rem;">
+                <span class="badge {% if alert.severity == 'CRITICAL' %}bg-danger{% elif alert.severity == 'HIGH' %}badge-high{% elif alert.severity == 'MEDIUM' %}badge-medium{% else %}badge-low{% endif %}" style="font-size:0.7rem;">
+                  {{ alert.severity }}
+                </span>
+                <span class="badge bg-secondary" style="font-size:0.7rem;">{{ alert.get_status_display }}</span>
+                {% if alert.affected_system %}
+                <small class="text-muted2">{{ alert.affected_system.name }}</small>
+                {% endif %}
+              </div>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted2">
+          <i class="fa-solid fa-circle-info me-1"></i>
+          No open alerts available. You can create an incident without alerts and add them later.
+        </p>
+        {% endif %}
+      </div>
+
+      {# ── Options ── #}
+      <div class="hs-card-header border-top" style="border-color:var(--hs-border)!important;">
+        <span class="hs-card-title">Incident Options</span>
+      </div>
+      <div class="hs-card-body">
+        <div class="form-check mb-3">
+          <input type="checkbox" name="self_assign" class="form-check-input" id="self_assign" checked>
+          <label class="form-check-label" for="self_assign">
+            Assign myself as Incident Commander
+          </label>
+        </div>
+      </div>
+
+      {# ── Actions ── #}
+      <div class="hs-card-body border-top" style="border-color:var(--hs-border)!important;">
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-hs-primary">
+            <i class="fa-solid fa-plus me-1"></i> Create Incident
+          </button>
+          <a href="{% url 'alerts:incident_list' %}" class="btn btn-hs-outline">
+            Cancel
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {# ── Help Sidebar ── #}
+  <div class="col-lg-4">
+    <div class="hs-card mb-3">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-circle-question me-2 text-cyber"></i>About Incidents</span>
+      </div>
+      <div class="hs-card-body">
+        <p class="small mb-2">An incident is a formal record of a security event that requires coordinated response following the NIST incident response lifecycle.</p>
+
+        <strong class="d-block mt-3 mb-2">Lifecycle Phases:</strong>
+        <ul class="small text-muted2 ps-3 mb-3">
+          <li><strong>Detection & Analysis</strong> – Confirmed incident, initial investigation</li>
+          <li><strong>Containment</strong> – Limiting impact and extent</li>
+          <li><strong>Eradication</strong> – Removing the threat</li>
+          <li><strong>Recovery</strong> – Restoring systems to normal</li>
+          <li><strong>Post-Incident</strong> – Lessons learned, improvements</li>
+        </ul>
+
+        <strong class="d-block mb-2">Best Practices:</strong>
+        <ul class="small text-muted2 ps-3">
+          <li>Group related alerts for better context</li>
+          <li>Assign a clear incident commander</li>
+          <li>Document timeline and findings</li>
+          <li>Transition through phases as investigation progresses</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

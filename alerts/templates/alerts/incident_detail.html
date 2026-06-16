@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Incident — {{ incident.incident_number }}{% endblock %}
+{% block page_title %}Incident Detail{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{% url 'alerts:incident_list' %}" class="btn btn-xs btn-hs-outline mb-2">
+    <i class="fa-solid fa-arrow-left me-1"></i> Back to Incidents
+  </a>
+  <h1><code class="text-cyber">{{ incident.incident_number }}</code> — {{ incident.title }}</h1>
+  <p class="text-muted2">Detected {{ incident.detected_at|date:"M d, Y H:i" }}</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {# ── Description ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Description</span></div>
+      <div class="hs-card-body">
+        <p>{{ incident.description }}</p>
+      </div>
+    </div>
+
+    {# ── Phase Transition ── #}
+    {% if incident.phase != 'CLOSED' %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Phase Transition</span></div>
+      <div class="hs-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label small">New Phase</label>
+              <select name="phase" class="form-select form-select-sm" required>
+                <option value="">Select new phase...</option>
+                {% for value, label in phase_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <button type="submit" name="action" value="transition_phase" class="btn btn-sm btn-hs-primary w-100">
+                <i class="fa-solid fa-arrow-right me-1"></i> Transition
+              </button>
+            </div>
+          </div>
+          <div class="mt-2">
+            <label class="form-label small">Transition Notes</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Analysis ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Analysis & Assessment</span></div>
+      <div class="hs-card-body">
+        {% if incident.impact_assessment or incident.root_cause or incident.remediation_steps %}
+        <div class="mb-3">
+          <strong>Impact Assessment</strong>
+          <p class="text-muted2">{{ incident.impact_assessment|default:"Not documented" }}</p>
+        </div>
+        <div class="mb-3">
+          <strong>Root Cause</strong>
+          <p class="text-muted2">{{ incident.root_cause|default:"Not documented" }}</p>
+        </div>
+        <div>
+          <strong>Remediation Steps</strong>
+          <p class="text-muted2">{{ incident.remediation_steps|default:"Not documented" }}</p>
+        </div>
+        {% else %}
+        <p class="text-muted2">No analysis documented yet</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Related Alerts ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header">
+        <span class="hs-card-title">Related Alerts ({{ incident.alerts.count }})</span>
+      </div>
+      <div class="hs-card-body p-0">
+        {% if incident.alerts.all %}
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead><tr><th>Title</th><th>Severity</th><th>Status</th><th>Created</th></tr></thead>
+            <tbody>
+              {% for alert in incident.alerts.all %}
+              <tr>
+                <td><a href="{% url 'alerts:alert_detail' alert.pk %}" class="text-cyber">{{ alert.title|truncatechars:50 }}</a></td>
+                <td><span class="badge {% if alert.severity == 'CRITICAL' %}bg-danger{% elif alert.severity == 'HIGH' %}badge-high{% elif alert.severity == 'MEDIUM' %}badge-medium{% else %}badge-low{% endif %}">{{ alert.severity }}</span></td>
+                <td><span class="badge bg-secondary">{{ alert.get_status_display }}</span></td>
+                <td><small class="text-muted2">{{ alert.created_at|date:"M d, Y" }}</small></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted2 px-3 py-3 mb-0">No alerts associated with this incident yet</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Add Alerts Form ── #}
+    {% if available_alerts %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Add Related Alerts</span></div>
+      <div class="hs-card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-2">
+            <label class="form-label small">Select Alert</label>
+            <select name="alert_id" class="form-select form-select-sm" required>
+              <option value="">Choose alert...</option>
+              {% for alert in available_alerts %}
+              <option value="{{ alert.pk }}">{{ alert.title|truncatechars:60 }} - [{{ alert.severity }}]</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" name="action" value="add_alert" class="btn btn-sm btn-hs-outline">
+            <i class="fa-solid fa-plus me-1"></i> Add Alert
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Timeline Log ── #}
+    <div class="hs-card">
+      <div class="hs-card-header"><span class="hs-card-title">Timeline</span></div>
+      <div class="hs-card-body">
+        {% if incident.timeline %}
+        <div class="timeline">
+          {% for entry in incident.timeline|dictsort:"timestamp"|slice:"-10:" %}
+          <div class="timeline-item mb-3 pb-3" style="border-bottom:1px solid var(--hs-border);">
+            <small class="text-muted2">{{ entry.timestamp|slice:"-19:" }}</small>
+            <p class="mb-1"><strong>{{ entry.action }}</strong></p>
+            {% if entry.details %}<p class="text-muted2 small mb-0">{{ entry.details }}</p>{% endif %}
+            <small class="text-muted2">by {{ entry.user }}</small>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted2">No timeline events yet</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Sidebar ── #}
+  <div class="col-lg-4">
+    {# ── Status Card ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Status</span></div>
+      <div class="hs-card-body">
+        <div class="mb-3">
+          <small class="text-muted2">Current Phase</small>
+          <p class="mb-0">
+            <span class="badge {% if incident.phase == 'DETECT' %}bg-danger{% elif incident.phase == 'CONTAIN' %}badge-high{% elif incident.phase == 'ERADICATE' %}badge-medium{% elif incident.phase == 'RECOVER' %}badge-low{% else %}bg-secondary{% endif %}">
+              {{ incident.get_phase_display }}
+            </span>
+          </p>
+        </div>
+        <div>
+          <small class="text-muted2">Closed</small>
+          <p class="mb-0">
+            {% if incident.closed_at %}
+            <i class="fa-solid fa-check" style="color:var(--hs-health-grn);"></i> {{ incident.closed_at|date:"M d, Y H:i" }}
+            {% else %}
+            <i class="fa-solid fa-shield-halved text-cyber"></i> Active
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {# ── Incident Commander ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Incident Commander</span></div>
+      <div class="hs-card-body">
+        {% if incident.incident_commander %}
+        <p class="mb-0"><strong>{{ incident.incident_commander.username }}</strong></p>
+        <small class="text-muted2">{{ incident.incident_commander.email }}</small>
+        {% else %}
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" name="action" value="assign_commander" class="btn btn-sm btn-hs-outline w-100">
+            <i class="fa-solid fa-shield-halved me-1"></i> Assign to Me
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Metadata ── #}
+    <div class="hs-card">
+      <div class="hs-card-header"><span class="hs-card-title">Details</span></div>
+      <div class="hs-card-body">
+        <small class="d-block mb-2">
+          <strong>Created By</strong><br>
+          <span class="text-muted2">{{ incident.created_by.username|default:"System" }}</span>
+        </small>
+        <small class="d-block mb-2">
+          <strong>Detected</strong><br>
+          <span class="text-muted2">{{ incident.detected_at|date:"M d, Y H:i" }}</span>
+        </small>
+        {% if incident.contained_at %}
+        <small class="d-block mb-2">
+          <strong>Contained</strong><br>
+          <span class="text-muted2">{{ incident.contained_at|date:"M d, Y H:i" }}</span>
+        </small>
+        {% endif %}
+        {% if incident.resolved_at %}
+        <small class="d-block">
+          <strong>Resolved</strong><br>
+          <span class="text-muted2">{{ incident.resolved_at|date:"M d, Y H:i" }}</span>
+        </small>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

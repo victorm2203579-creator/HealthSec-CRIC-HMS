@@ -1,0 +1,3 @@
+cd "C:\Users\bigge\OneDrive\Documents\PROJECTS\HEALTH-SEC"
+.\venv\Scripts\Activate.ps1
+python manage.py runserver

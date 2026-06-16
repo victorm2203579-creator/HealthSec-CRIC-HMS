@@ -1,0 +1,302 @@
+[
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 1,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440001",
+      "patient_code": "PAT-00001",
+      "record_type": "MEDICAL_HISTORY",
+      "sensitivity_level": "CRITICAL",
+      "department": "Cardiology",
+      "created_by": 1,
+      "is_flagged": false,
+      "created_at": "2026-01-01T10:00:00Z",
+      "last_modified": "2026-05-20T14:30:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 2,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440002",
+      "patient_code": "PAT-00002",
+      "record_type": "PRESCRIPTION",
+      "sensitivity_level": "HIGH",
+      "department": "Pharmacy",
+      "created_by": 1,
+      "is_flagged": false,
+      "created_at": "2026-01-02T11:00:00Z",
+      "last_modified": "2026-05-19T09:15:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 3,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440003",
+      "patient_code": "PAT-00003",
+      "record_type": "LAB_RESULT",
+      "sensitivity_level": "HIGH",
+      "department": "Laboratory",
+      "created_by": 2,
+      "is_flagged": false,
+      "created_at": "2026-01-03T08:00:00Z",
+      "last_modified": "2026-05-21T16:45:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 4,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440004",
+      "patient_code": "PAT-00004",
+      "record_type": "IMAGING",
+      "sensitivity_level": "CRITICAL",
+      "department": "Radiology",
+      "created_by": 3,
+      "is_flagged": false,
+      "created_at": "2026-01-04T13:20:00Z",
+      "last_modified": "2026-05-22T10:00:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 5,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440005",
+      "patient_code": "PAT-00005",
+      "record_type": "INSURANCE",
+      "sensitivity_level": "MEDIUM",
+      "department": "Finance",
+      "created_by": 4,
+      "is_flagged": false,
+      "created_at": "2026-01-05T15:30:00Z",
+      "last_modified": "2026-05-23T11:20:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 6,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440006",
+      "patient_code": "PAT-00006",
+      "record_type": "PERSONAL_INFO",
+      "sensitivity_level": "MEDIUM",
+      "department": "Administration",
+      "created_by": 5,
+      "is_flagged": false,
+      "created_at": "2026-01-06T09:00:00Z",
+      "last_modified": "2026-05-24T13:45:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 7,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440007",
+      "patient_code": "PAT-00007",
+      "record_type": "MEDICAL_HISTORY",
+      "sensitivity_level": "HIGH",
+      "department": "Neurology",
+      "created_by": 1,
+      "is_flagged": false,
+      "created_at": "2026-01-07T10:15:00Z",
+      "last_modified": "2026-05-25T08:30:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 8,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440008",
+      "patient_code": "PAT-00008",
+      "record_type": "LAB_RESULT",
+      "sensitivity_level": "CRITICAL",
+      "department": "Pathology",
+      "created_by": 2,
+      "is_flagged": true,
+      "created_at": "2026-01-08T14:00:00Z",
+      "last_modified": "2026-05-20T17:30:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 9,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440009",
+      "patient_code": "PAT-00009",
+      "record_type": "PRESCRIPTION",
+      "sensitivity_level": "MEDIUM",
+      "department": "Oncology",
+      "created_by": 3,
+      "is_flagged": false,
+      "created_at": "2026-01-09T11:45:00Z",
+      "last_modified": "2026-05-21T12:00:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 10,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440010",
+      "patient_code": "PAT-00010",
+      "record_type": "IMAGING",
+      "sensitivity_level": "HIGH",
+      "department": "Cardiology",
+      "created_by": 4,
+      "is_flagged": false,
+      "created_at": "2026-01-10T16:20:00Z",
+      "last_modified": "2026-05-22T15:00:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 11,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440011",
+      "patient_code": "PAT-00011",
+      "record_type": "MEDICAL_HISTORY",
+      "sensitivity_level": "CRITICAL",
+      "department": "ICU",
+      "created_by": 5,
+      "is_flagged": false,
+      "created_at": "2026-01-11T07:30:00Z",
+      "last_modified": "2026-05-25T09:45:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 12,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440012",
+      "patient_code": "PAT-00012",
+      "record_type": "LAB_RESULT",
+      "sensitivity_level": "MEDIUM",
+      "department": "Microbiology",
+      "created_by": 1,
+      "is_flagged": false,
+      "created_at": "2026-01-12T12:10:00Z",
+      "last_modified": "2026-05-23T14:20:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 13,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440013",
+      "patient_code": "PAT-00013",
+      "record_type": "INSURANCE",
+      "sensitivity_level": "HIGH",
+      "department": "Finance",
+      "created_by": 2,
+      "is_flagged": false,
+      "created_at": "2026-01-13T13:50:00Z",
+      "last_modified": "2026-05-24T10:30:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 14,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440014",
+      "patient_code": "PAT-00014",
+      "record_type": "PERSONAL_INFO",
+      "sensitivity_level": "CRITICAL",
+      "department": "Administration",
+      "created_by": 3,
+      "is_flagged": true,
+      "created_at": "2026-01-14T06:00:00Z",
+      "last_modified": "2026-05-25T11:15:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 15,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440015",
+      "patient_code": "PAT-00015",
+      "record_type": "PRESCRIPTION",
+      "sensitivity_level": "MEDIUM",
+      "department": "Psychiatry",
+      "created_by": 4,
+      "is_flagged": false,
+      "created_at": "2026-01-15T18:30:00Z",
+      "last_modified": "2026-05-21T16:00:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 16,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440016",
+      "patient_code": "PAT-00016",
+      "record_type": "LAB_RESULT",
+      "sensitivity_level": "HIGH",
+      "department": "Chemistry",
+      "created_by": 5,
+      "is_flagged": false,
+      "created_at": "2026-01-16T08:45:00Z",
+      "last_modified": "2026-05-22T12:30:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 17,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440017",
+      "patient_code": "PAT-00017",
+      "record_type": "IMAGING",
+      "sensitivity_level": "CRITICAL",
+      "department": "CT/MRI",
+      "created_by": 1,
+      "is_flagged": false,
+      "created_at": "2026-01-17T14:15:00Z",
+      "last_modified": "2026-05-23T09:00:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 18,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440018",
+      "patient_code": "PAT-00018",
+      "record_type": "MEDICAL_HISTORY",
+      "sensitivity_level": "HIGH",
+      "department": "Emergency",
+      "created_by": 2,
+      "is_flagged": false,
+      "created_at": "2026-01-18T22:00:00Z",
+      "last_modified": "2026-05-25T15:45:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 19,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440019",
+      "patient_code": "PAT-00019",
+      "record_type": "PRESCRIPTION",
+      "sensitivity_level": "MEDIUM",
+      "department": "Pediatrics",
+      "created_by": 3,
+      "is_flagged": false,
+      "created_at": "2026-01-19T10:30:00Z",
+      "last_modified": "2026-05-20T13:20:00Z"
+    }
+  },
+  {
+    "model": "monitoring.patientrecord",
+    "pk": 20,
+    "fields": {
+      "record_id": "550e8400-e29b-41d4-a716-446655440020",
+      "patient_code": "PAT-00020",
+      "record_type": "LAB_RESULT",
+      "sensitivity_level": "CRITICAL",
+      "department": "Hematology",
+      "created_by": 4,
+      "is_flagged": false,
+      "created_at": "2026-01-20T11:00:00Z",
+      "last_modified": "2026-05-24T17:30:00Z"
+    }
+  }
+]

@@ -1,0 +1,22 @@
+SECURITY ALERT
+==============================================================
+
+Alert: {{ alert.title }}
+
+Alert Details:
+  ID:        #{{ alert.id|truncatewords:1 }}
+  Type:      {{ alert.get_alert_type_display }}
+  Severity:  {{ alert.get_severity_display }}
+  Status:    {{ alert.get_status_display }}
+  Created:   {{ alert.created_at|date:"Y-m-d H:i:s" }} WAT
+
+Description:
+{{ alert.description }}
+
+View this alert:
+{{ alert_url }}
+
+==============================================================
+This is an automated security alert from {{ site_name }}.
+Do not reply to this email. For support, contact your system
+administrator.

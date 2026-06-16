@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Backup Codes{% endblock %}
+{% block page_title %}Save Your Backup Codes{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Important: Save Your Backup Codes</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-danger">
+                        <strong>CRITICAL:</strong> These codes are your backup access to your account if you lose access to your authenticator app.
+                        <strong>Store them in a safe place.</strong> You will not be able to see these codes again!
+                    </div>
+
+                    <p>You have <strong>{{ backup_codes|length }} backup codes</strong>. Each code can be used ONE TIME as a replacement for your authenticator code during login.</p>
+
+                    <div class="bg-light p-4 rounded mb-4" style="border: 2px solid #dee2e6; font-family: monospace;">
+                        {% for code in backup_codes %}
+                            <div class="mb-2">
+                                <span class="text-muted">{{ forloop.counter }}.</span>
+                                <code>{{ code }}</code>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <p class="text-muted small mb-4">
+                        <strong>How to use:</strong> During login, if you can't access your authenticator app, select "Use a backup code instead" and enter one of these codes.
+                    </p>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <button onclick="printCodes()" class="btn btn-secondary">
+                            <i class="fas fa-print"></i> Print Codes
+                        </button>
+                        <button onclick="copyCodes()" class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Copy All Codes
+                        </button>
+                    </div>
+
+                    <hr />
+
+                    <p class="mb-0">
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-primary">
+                            Back to Profile
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <small>
+                    <strong>Keep your backup codes safe:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Store in a password manager</li>
+                        <li>Write down and store in a secure location</li>
+                        <li>Do NOT share with anyone</li>
+                        <li>Do NOT store in plain text online</li>
+                    </ul>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function printCodes() {
+    window.print();
+}
+
+function copyCodes() {
+    const codes = [
+        {% for code in backup_codes %}'{{ code }}'{% if not forloop.last %}, {% endif %}{% endfor %}
+    ].join('\n');
+
+    navigator.clipboard.writeText(codes).then(() => {
+        alert('Backup codes copied to clipboard');
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
+}
+</script>
+{% endblock %}

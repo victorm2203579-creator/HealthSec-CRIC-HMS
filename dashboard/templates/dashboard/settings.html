@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}System Settings — HealthSec{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+  <div>
+    <h4 style="font-weight:700;color:#1a1a2e;margin-bottom:.25rem;">
+      <i class="typcn typcn-cog-outline" style="color:#5b47fb;"></i> System Settings
+    </h4>
+    <p style="color:#6c757d;font-size:.85rem;margin:0;">Administrator controls — HealthSec CRIC HMS</p>
+  </div>
+</div>
+
+<div class="row row-sm">
+
+  <!-- ── Left column ── -->
+  <div class="col-lg-4 mg-b-20 mg-lg-b-0">
+
+    <!-- System Status Card -->
+    <div class="card mg-b-20">
+      <div class="card-header">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#1a1a2e;">
+          <i class="typcn typcn-info-large" style="color:#5b47fb;"></i> System Status
+        </h6>
+      </div>
+      <div class="card-body pd-0">
+        <ul class="list-unstyled mg-b-0">
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12" style="border-bottom:1px solid #f0f0f0;">
+            <span style="color:#6c757d;font-size:.85rem;">Version</span>
+            <code style="font-size:.82rem;">{{ version }}</code>
+          </li>
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12" style="border-bottom:1px solid #f0f0f0;">
+            <span style="color:#6c757d;font-size:.85rem;">Debug Mode</span>
+            {% if debug_mode %}
+            <span style="color:#fd7e14;font-size:.85rem;font-weight:600;">ON (dev)</span>
+            {% else %}
+            <span style="color:#28a745;font-size:.85rem;font-weight:600;">OFF</span>
+            {% endif %}
+          </li>
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12" style="border-bottom:1px solid #f0f0f0;">
+            <span style="color:#6c757d;font-size:.85rem;">Database</span>
+            <code style="font-size:.82rem;">{{ db_engine }}</code>
+          </li>
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12" style="border-bottom:1px solid #f0f0f0;">
+            <span style="color:#6c757d;font-size:.85rem;">Session Timeout</span>
+            <span style="font-size:.85rem;font-weight:600;">{{ session_timeout }} min</span>
+          </li>
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12" style="border-bottom:1px solid #f0f0f0;">
+            <span style="color:#6c757d;font-size:.85rem;">Email Backend</span>
+            {% if email_working %}
+            <span style="color:#28a745;font-size:.82rem;"><i class="typcn typcn-tick"></i> {{ email_backend }}</span>
+            {% else %}
+            <span style="color:#dc3545;font-size:.82rem;"><i class="typcn typcn-times"></i> Not configured</span>
+            {% endif %}
+          </li>
+          <li class="d-flex justify-content-between pd-x-20 pd-y-12">
+            <span style="color:#6c757d;font-size:.85rem;">ML Model</span>
+            {% if ml_status.is_trained %}
+            <span style="color:#28a745;font-size:.82rem;"><i class="typcn typcn-tick"></i> Trained</span>
+            {% else %}
+            <span style="color:#fd7e14;font-size:.82rem;"><i class="typcn typcn-warning-outline"></i> Not trained</span>
+            {% endif %}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Database Stats -->
+    <div class="card">
+      <div class="card-header">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#1a1a2e;">
+          <i class="typcn typcn-chart-bar-outline" style="color:#5b47fb;"></i> Database Stats
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row row-sm">
+          {% for label, val in stats.items %}
+          <div class="col-6 mg-b-15">
+            <div style="background:#f8f9fa;border-radius:6px;padding:.75rem;text-align:center;border-left:3px solid #5b47fb;">
+              <div style="font-size:1.6rem;font-weight:800;color:#5b47fb;line-height:1;">{{ val }}</div>
+              <div style="font-size:.7rem;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem;">{{ label|title }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div><!-- col left -->
+
+  <!-- ── Right column: Actions ── -->
+  <div class="col-lg-8">
+
+    <!-- Run Compliance -->
+    <div class="card mg-b-20">
+      <div class="card-header">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#1a1a2e;">
+          <i class="typcn typcn-document-text" style="color:#28a745;"></i> Compliance Checks
+        </h6>
+      </div>
+      <div class="card-body">
+        <p style="color:#6c757d;font-size:.85rem;margin-bottom:1rem;">Run automated checks against all active frameworks. Results update the compliance dashboard immediately.</p>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="run_compliance">
+          <button type="submit" class="btn btn-success">
+            <i class="typcn typcn-media-play mr-2"></i> Run Compliance Checks
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ML Training -->
+    <div class="card mg-b-20">
+      <div class="card-header">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#1a1a2e;">
+          <i class="typcn typcn-flash-outline" style="color:#5b47fb;"></i> ML Anomaly Detection
+        </h6>
+      </div>
+      <div class="card-body">
+        <p style="color:#6c757d;font-size:.85rem;margin-bottom:1rem;">
+          Retrain the Isolation Forest model on current access logs. Recommended after loading new data.
+          {% if ml_status.is_trained %}
+          <br><span style="color:#28a745;"><i class="typcn typcn-tick"></i> Model trained &mdash; {{ ml_status.trained_at|date:"M d, Y H:i"|default:"recently" }}</span>
+          {% endif %}
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="train_ml">
+          <button type="submit" class="btn btn-primary" style="background:#5b47fb;border-color:#5b47fb;">
+            <i class="typcn typcn-refresh mr-2"></i> Train ML Model
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Test Email -->
+    <div class="card mg-b-20">
+      <div class="card-header">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#1a1a2e;">
+          <i class="typcn typcn-mail" style="color:#17a2b8;"></i> Email Configuration
+        </h6>
+      </div>
+      <div class="card-body">
+        <p style="color:#6c757d;font-size:.85rem;margin-bottom:1rem;">
+          Send a test email to <strong>{{ request.user.email }}</strong> to verify SMTP is configured.
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="test_email">
+          <button type="submit" class="btn btn-info text-white">
+            <i class="typcn typcn-at mr-2"></i> Send Test Email
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card" style="border:1px solid #f5c6cb;">
+      <div class="card-header" style="background:#fff5f5;">
+        <h6 class="card-title mg-b-0" style="font-weight:700;color:#dc3545;">
+          <i class="typcn typcn-warning-outline"></i> Danger Zone
+        </h6>
+      </div>
+      <div class="card-body">
+        <p style="color:#6c757d;font-size:.85rem;margin-bottom:1rem;">
+          Clear all demo data and reload a fresh dataset. <strong>This action cannot be undone.</strong>
+        </p>
+        <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#clearModal">
+          <i class="typcn typcn-trash mr-2"></i> Clear &amp; Reset Demo Data
+        </button>
+      </div>
+    </div>
+
+  </div><!-- col right -->
+</div><!-- row -->
+
+<!-- Clear Confirm Modal -->
+<div class="modal fade" id="clearModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" style="color:#dc3545;font-weight:700;">
+          <i class="typcn typcn-warning-outline"></i> Confirm Clear
+        </h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#495057;">This will delete <strong>all demo data</strong> (patients, access logs, alerts, threats, compliance results) and reload a fresh dataset. Are you sure?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <form method="post" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="clear_demo">
+          <input type="hidden" name="confirm_clear" value="yes">
+          <button type="submit" class="btn btn-danger">Yes, Clear Everything</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

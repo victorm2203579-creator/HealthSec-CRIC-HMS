@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block page_title %}{{ system.name }} — HealthSec{% endblock %}
+{% block page_header %}{{ system.name }}{% endblock %}
+{% block content %}
+<div class="mb-3">
+  <a href="{% url 'monitoring:system_list' %}" class="btn btn-sm" style="background:var(--hs-surface);color:var(--hs-text);border:1px solid var(--hs-border);">
+    <i class="fa-solid fa-arrow-left me-1"></i> Back to Systems
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-4">
+    <div class="hs-card">
+      <div class="hs-card-body">
+        <h6 class="text-white fw-bold mb-3">System Info</h6>
+        <dl class="mb-0" style="font-size:0.85rem;">
+          <dt class="text-muted">Status</dt>
+          <dd>{% if system.is_active %}<span style="color:#06d6a0;">Active</span>{% else %}<span style="color:#ef233c;">Inactive</span>{% endif %}</dd>
+          <dt class="text-muted">Type</dt>
+          <dd class="text-white">{{ system.system_type|default:"N/A" }}</dd>
+          <dt class="text-muted">Contains PHI</dt>
+          <dd>{% if system.contains_phi %}<span style="color:#ef233c;">Yes</span>{% else %}<span style="color:#06d6a0;">No</span>{% endif %}</dd>
+          <dt class="text-muted">Description</dt>
+          <dd class="text-white">{{ system.description|default:"No description provided." }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-8">
+    <div class="hs-card">
+      <div class="hs-card-body">
+        <h6 class="text-white fw-bold mb-3">Recent Events</h6>
+        {% if events %}
+        <div class="table-responsive">
+          <table class="table table-sm" style="color:var(--hs-text);font-size:0.85rem;">
+            <thead style="border-color:var(--hs-border);">
+              <tr style="color:var(--hs-text-muted);">
+                <th>Severity</th><th>Event Type</th><th>Description</th><th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in events %}
+              <tr style="border-color:var(--hs-border);">
+                <td>
+                  {% if event.severity == 'CRITICAL' %}<span style="color:#ef233c;">Critical</span>
+                  {% elif event.severity == 'HIGH' %}<span style="color:#f77f00;">High</span>
+                  {% elif event.severity == 'MEDIUM' %}<span style="color:#00b4d8;">Medium</span>
+                  {% else %}<span style="color:#06d6a0;">Low</span>{% endif %}
+                </td>
+                <td>{{ event.event_type|default:"—" }}</td>
+                <td>{{ event.description|truncatechars:60 }}</td>
+                <td style="color:var(--hs-text-muted);">{{ event.occurred_at|date:"M d, H:i" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No events recorded for this system.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

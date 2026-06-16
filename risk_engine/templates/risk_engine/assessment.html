@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% block title %}Risk Assessments{% endblock %}
+{% block page_title %}Risk Assessment History{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-clipboard-check me-2 text-cyber"></i>Risk Assessments</h1>
+    <p class="text-muted2 mb-0">Historical aggregated risk snapshots</p>
+  </div>
+  {% if request.user.is_analyst %}
+  <form method="post" action="{% url 'risk_engine:generate_assessment' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-hs-primary">
+      <i class="fa-solid fa-play me-1"></i> Generate Assessment
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+{# ── Latest Assessment Banner ── #}
+{% if latest %}
+<div class="hs-card mb-4" style="border-left:4px solid
+  {% if latest.risk_level == 'CRITICAL' %}#ff006e
+  {% elif latest.risk_level == 'HIGH' %}var(--hs-danger)
+  {% elif latest.risk_level == 'MEDIUM' %}var(--hs-warning)
+  {% else %}var(--hs-health-grn){% endif %};">
+  <div class="hs-card-body">
+    <div class="row g-3 align-items-center">
+      <div class="col-auto">
+        <div style="font-size:2.5rem;font-weight:700;color:
+          {% if latest.risk_level == 'CRITICAL' %}#ff006e
+          {% elif latest.risk_level == 'HIGH' %}var(--hs-danger)
+          {% elif latest.risk_level == 'MEDIUM' %}var(--hs-warning)
+          {% else %}var(--hs-health-grn){% endif %};">
+          {{ latest.overall_risk_score|floatformat:1 }}
+        </div>
+        <small class="text-muted2">/ 100</small>
+      </div>
+      <div class="col">
+        <h5 class="mb-1">
+          Latest Assessment &mdash;
+          <span class="badge fs-6 {{ latest.get_risk_level_badge_class }}">{{ latest.risk_level }}</span>
+        </h5>
+        <small class="text-muted2">
+          Conducted {{ latest.conducted_at|date:"d M Y H:i" }}
+          {% if latest.conducted_by %}by {{ latest.conducted_by.username }}{% endif %}
+          &mdash; Next due: <strong>{{ latest.next_assessment_due|date:"d M Y" }}</strong>
+        </small>
+      </div>
+      {% if latest.recommendations %}
+      <div class="col-lg-5">
+        <small class="text-muted2 d-block mb-1 fw-semibold">Recommendations</small>
+        <small>{{ latest.recommendations|linebreaksbr }}</small>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  {# ── Risk Score Trend Chart ── #}
+  <div class="col-lg-8">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-line me-2 text-cyber"></i>Assessment Trend</span>
+        <small class="text-muted2">Last 15 assessments</small>
+      </div>
+      <div class="hs-card-body">
+        <canvas id="assessTrendChart" height="110"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# ── Quick Stats ── #}
+  <div class="col-lg-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-bar me-2 text-cyber"></i>Assessment Stats</span>
+      </div>
+      <div class="hs-card-body">
+        <div class="text-center mb-3">
+          <div style="font-size:2rem;font-weight:700;color:var(--hs-cyber-blue);">
+            {{ page_obj.paginator.count }}
+          </div>
+          <small class="text-muted2">Total Assessments</small>
+        </div>
+        {% if latest %}
+        <div class="d-flex justify-content-between mb-2">
+          <small class="text-muted2">Latest Score</small>
+          <strong>{{ latest.overall_risk_score|floatformat:1 }}</strong>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+          <small class="text-muted2">Risk Level</small>
+          <span class="badge {{ latest.get_risk_level_badge_class }}">{{ latest.risk_level }}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <small class="text-muted2">Next Due</small>
+          <strong>{{ latest.next_assessment_due|date:"d M Y" }}</strong>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── History Table ── #}
+<div class="hs-card">
+  <div class="hs-card-header">
+    <span class="hs-card-title"><i class="fa-solid fa-history me-2 text-cyber"></i>Assessment History</span>
+  </div>
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Score</th>
+            <th>Level</th>
+            <th>Conducted By</th>
+            <th>Next Due</th>
+            <th>Top Threats</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in page_obj %}
+          <tr>
+            <td>
+              <small>{{ a.conducted_at|date:"d M Y H:i" }}</small>
+              {% if forloop.first %}<span class="badge badge-low ms-1" style="font-size:.65rem;">Latest</span>{% endif %}
+            </td>
+            <td>
+              <strong style="color:
+                {% if a.risk_level == 'CRITICAL' %}#ff006e
+                {% elif a.risk_level == 'HIGH' %}var(--hs-danger)
+                {% elif a.risk_level == 'MEDIUM' %}var(--hs-warning)
+                {% else %}var(--hs-health-grn){% endif %};">
+                {{ a.overall_risk_score|floatformat:1 }}
+              </strong>
+            </td>
+            <td>
+              <span class="badge {{ a.get_risk_level_badge_class }}">{{ a.risk_level }}</span>
+            </td>
+            <td>
+              <small class="text-muted2">{{ a.conducted_by.username|default:"System" }}</small>
+            </td>
+            <td>
+              <small class="text-muted2">{{ a.next_assessment_due|date:"d M Y" }}</small>
+            </td>
+            <td>
+              {% if a.top_threats %}
+              <small class="text-muted2">
+                {% for t in a.top_threats|slice:":2" %}{{ t }}{% if not forloop.last %}, {% endif %}{% endfor %}
+              </small>
+              {% else %}
+              <small class="text-muted2">—</small>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted2 py-5">
+              <i class="fa-solid fa-clipboard fa-2x mb-2 d-block text-cyber"></i>
+              No assessments generated yet.
+              {% if request.user.is_analyst %}Use the button above to generate one.{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const trendLabels = {{ trend_labels_json|safe }};
+const trendValues = {{ trend_values_json|safe }};
+
+new Chart(document.getElementById('assessTrendChart'), {
+  type: 'line',
+  data: {
+    labels: trendLabels,
+    datasets: [{
+      label: 'Risk Score',
+      data: trendValues,
+      borderColor: '#00d4ff',
+      backgroundColor: 'rgba(0,212,255,.1)',
+      fill: true,
+      tension: .3,
+      pointRadius: 4,
+      pointBackgroundColor: trendValues.map(v =>
+        v >= 76 ? '#ff006e' : v >= 51 ? '#e74c3c' : v >= 26 ? '#f39c12' : '#2ecc71'
+      ),
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#8899aa', maxRotation: 30 }, grid: { color: 'rgba(255,255,255,.05)' } },
+      y: {
+        ticks: { color: '#8899aa' },
+        grid: { color: 'rgba(255,255,255,.05)' },
+        min: 0, max: 100,
+        title: { display: true, text: 'Score (0-100)', color: '#8899aa', font: { size: 10 } }
+      }
+    }
+  }
+});
+</script>
+{% endblock %}

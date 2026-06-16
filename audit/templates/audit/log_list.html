@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Audit Logs{% endblock %}
+{% block page_title %}Audit Log Viewer{% endblock %}
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-file-shield me-2 text-cyber"></i>Audit Logs</h1>
+    <p class="text-muted2 mb-0">{{ total_count }} total log{{ total_count|pluralize }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'audit:integrity_check' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-shield-halved me-1"></i> Integrity Check
+    </a>
+    <a href="{% url 'audit:report' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-chart-bar me-1"></i> Report
+    </a>
+    <a href="?export=csv{% if user_filter %}&user={{ user_filter }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-sm btn-hs-primary">
+      <i class="fa-solid fa-download me-1"></i> Export CSV
+    </a>
+  </div>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-3">
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small">Search</label>
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Description, model, action..." value="{{ search_query }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">User</label>
+        <input type="text" name="user" class="form-control form-control-sm" placeholder="Username..." value="{{ user_filter }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Category</label>
+        <select name="category" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for value, label in category_choices %}
+          <option value="{{ value }}" {% if value == category_filter %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Days</label>
+        <select name="days" class="form-select form-select-sm">
+          <option value="7" {% if days_filter == "7" %}selected{% endif %}>Last 7 days</option>
+          <option value="30" {% if days_filter == "30" %}selected{% endif %}>Last 30 days</option>
+          <option value="90" {% if days_filter == "90" %}selected{% endif %}>Last 90 days</option>
+          <option value="365" {% if days_filter == "365" %}selected{% endif %}>Last year</option>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-sm btn-hs-primary w-100">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Logs Table ── #}
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    {% if logs %}
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Category</th>
+            <th>Target</th>
+            <th>Status</th>
+            <th>IP Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+          <tr style="border-left: 3px solid {% if log.status == 'SUCCESS' %}var(--hs-health-grn){% elif log.status == 'FAILURE' %}var(--hs-danger){% else %}var(--hs-warning){% endif %};">
+            <td><small>{{ log.timestamp|date:"M d, Y H:i:s" }}</small></td>
+            <td><small class="text-muted2">{{ log.user.username|default:"System" }}</small></td>
+            <td>
+              <code class="text-cyber">{{ log.action }}</code>
+            </td>
+            <td><span class="badge badge-medium">{{ log.get_action_category_display }}</span></td>
+            <td>
+              {% if log.target_model %}
+              <small class="text-muted2">{{ log.target_model }}{% if log.target_id %} #{{ log.target_id|truncatechars:10 }}{% endif %}</small>
+              {% else %}
+              <small class="text-muted2">—</small>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {% if log.status == 'SUCCESS' %}badge-low{% elif log.status == 'FAILURE' %}badge-critical{% else %}bg-warning{% endif %}">
+                {{ log.get_status_display }}
+              </span>
+            </td>
+            <td><small class="text-muted2">{{ log.ip_address|default:"—" }}</small></td>
+            <td>
+              <a href="{% url 'audit:log_detail' log.log_id %}" class="btn btn-xs btn-hs-outline" title="View details">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center text-muted2 py-5">
+      <i class="fa-solid fa-inbox fa-2x mb-2 d-block text-cyber"></i>
+      No audit logs found
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Pagination ── #}
+{% if page_obj.has_other_pages %}
+<nav class="mt-3 d-flex justify-content-center">
+  <ul class="pagination pagination-sm hs-pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}">
+        <i class="fa-solid fa-chevron-left"></i>
+      </a>
+    </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link text-muted2">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

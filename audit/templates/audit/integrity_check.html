@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Integrity Check{% endblock %}
+{% block page_title %}Audit Log Integrity Verification{% endblock %}
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Integrity Verification</h1>
+    <p class="text-muted2 mb-0">Verify that audit logs have not been tampered with</p>
+  </div>
+  <form method="post" class="d-flex gap-2">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-hs-primary">
+      <i class="fa-solid fa-check-double me-1"></i> Run Integrity Check
+    </button>
+  </form>
+</div>
+
+{# ── Latest Check Results ── #}
+{% if latest_check %}
+<div class="hs-card mb-4">
+  <div class="hs-card-header">
+    <span class="hs-card-title">Latest Integrity Check Results</span>
+    <span class="badge {% if latest_check.result == 'INTACT' %}badge-low{% elif latest_check.result == 'TAMPERED' %}badge-critical{% else %}bg-warning{% endif %}">
+      {{ latest_check.get_result_display }}
+    </span>
+  </div>
+  <div class="hs-card-body">
+    <div class="row">
+      <div class="col-md-4 text-center mb-3 mb-md-0">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--hs-cyber);">{{ latest_check.total_logs_checked }}</div>
+        <small class="text-muted2">Total Logs Checked</small>
+      </div>
+      <div class="col-md-4 text-center mb-3 mb-md-0">
+        <div style="font-size:2.5rem;font-weight:700;color:{% if latest_check.corrupted_logs > 0 %}var(--hs-danger){% else %}var(--hs-health-grn){% endif %};">{{ latest_check.corrupted_logs }}</div>
+        <small class="text-muted2">Corrupted Entries</small>
+      </div>
+      <div class="col-md-4 text-center">
+        <div style="font-size:2.5rem;font-weight:700;color:var(--hs-health-grn);">{{ verified_logs }}</div>
+        <small class="text-muted2">Verified Intact</small>
+      </div>
+    </div>
+
+    {% if latest_check.details %}
+    <hr style="border-color:var(--hs-border);">
+    <small class="text-muted2 d-block" style="white-space:pre-wrap;">{{ latest_check.details }}</small>
+    {% endif %}
+
+    <small class="text-muted2 d-block mt-3">
+      <i class="fa-solid fa-clock me-1"></i>
+      Checked at: {{ latest_check.checked_at|date:"M d, Y H:i:s" }} by {{ latest_check.checked_by.username|default:"System" }}
+    </small>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info mb-4">
+  <i class="fa-solid fa-circle-info me-2"></i>
+  No integrity checks have been run yet. Run your first check using the button above.
+</div>
+{% endif %}
+
+{# ── Corrupted Logs ── #}
+{% if corrupted_logs %}
+<div class="hs-card mb-4">
+  <div class="hs-card-header">
+    <span class="hs-card-title"><i class="fa-solid fa-triangle-exclamation me-2 text-cyber"></i>Tampered Logs Detected</span>
+  </div>
+  <div class="hs-card-body p-0">
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr style="border-color:var(--hs-danger);">
+            <th>Log ID</th>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Issue</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in corrupted_logs %}
+          <tr style="border-left:3px solid var(--hs-danger);">
+            <td><code class="small">{{ log.log_id|truncatechars:13 }}</code></td>
+            <td><small>{{ log.timestamp|date:"M d, Y H:i:s" }}</small></td>
+            <td><small class="text-muted2">{{ log.user.username|default:"System" }}</small></td>
+            <td><code class="small">{{ log.action }}</code></td>
+            <td><span class="badge badge-critical">Checksum Mismatch</span></td>
+            <td>
+              <a href="{% url 'audit:log_detail' log.log_id %}" class="btn btn-xs btn-hs-outline">
+                <i class="fa-solid fa-eye"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{# ── Integrity Check History ── #}
+<div class="hs-card">
+  <div class="hs-card-header"><span class="hs-card-title">Check History</span></div>
+  <div class="hs-card-body p-0">
+    {% if all_checks %}
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr>
+            <th>Checked At</th>
+            <th>Checked By</th>
+            <th>Total Checked</th>
+            <th>Corrupted</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for check in all_checks %}
+          <tr>
+            <td><small>{{ check.checked_at|date:"M d, Y H:i:s" }}</small></td>
+            <td><small class="text-muted2">{{ check.checked_by.username|default:"System" }}</small></td>
+            <td><strong>{{ check.total_logs_checked }}</strong></td>
+            <td>
+              {% if check.corrupted_logs > 0 %}
+              <strong style="color:var(--hs-danger);">{{ check.corrupted_logs }}</strong>
+              {% else %}
+              <span class="text-muted2">0</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge {% if check.result == 'INTACT' %}badge-low{% elif check.result == 'TAMPERED' %}badge-critical{% else %}bg-warning{% endif %}">
+                {{ check.get_result_display }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted2 px-3 py-3 mb-0">No check history available</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

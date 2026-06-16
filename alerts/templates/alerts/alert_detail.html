@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Alert — {{ alert.title }}{% endblock %}
+{% block page_title %}Alert Detail{% endblock %}
+{% block content %}
+<div class="page-header">
+  <a href="{% url 'alerts:alert_list' %}" class="btn btn-xs btn-hs-outline mb-2">
+    <i class="fa-solid fa-arrow-left me-1"></i> Back to Alerts
+  </a>
+  <h1><code class="text-cyber">#{{ alert.id|truncatechars:8 }}</code> — {{ alert.title }}</h1>
+  <p class="text-muted2">{{ alert.get_alert_type_display }} · {{ alert.created_at|date:"M d, Y H:i" }}</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    {# ── Description ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Description</span></div>
+      <div class="hs-card-body">
+        <p>{{ alert.description }}</p>
+        {% if tags_list %}
+        <div class="mt-2">
+          {% for tag in tags_list %}
+          <span class="badge bg-secondary me-1">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Actions ── #}
+    {% if alert.status != 'RESOLVED' and alert.status != 'CLOSED' %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Actions</span></div>
+      <div class="hs-card-body">
+        <form method="post">
+          {% csrf_token %}
+          {% if alert.status == 'NEW' %}
+          <button type="submit" name="action" value="acknowledge" class="btn btn-sm btn-hs-primary me-2">
+            <i class="fa-solid fa-check me-1"></i> Acknowledge
+          </button>
+          {% endif %}
+
+          {% if alert.status in 'ACK,IN_PROGRESS' %}
+          <div class="mb-3">
+            <label class="form-label small">Resolution Status</label>
+            <select name="resolution_status" class="form-select form-select-sm mb-2">
+              <option value="RESOLVED">Mark as Resolved</option>
+              <option value="CLOSED">Close Alert</option>
+              <option value="FP">Mark as False Positive</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small">Resolution Notes</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="3" placeholder="Optional notes about resolution..."></textarea>
+          </div>
+          <button type="submit" name="action" value="resolve" class="btn btn-sm btn-hs-success me-2">
+            <i class="fa-solid fa-check-circle me-1"></i> Resolve
+          </button>
+          {% endif %}
+
+          {% if not alert.assigned_to or alert.assigned_to != request.user %}
+          <button type="submit" name="action" value="assign" class="btn btn-sm btn-hs-outline me-2">
+            <i class="fa-solid fa-user me-1"></i> Assign to Me
+          </button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Source Event ── #}
+    {% if alert.source_event %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Source Event</span></div>
+      <div class="hs-card-body">
+        <p><strong>{{ alert.source_event.title }}</strong></p>
+        <p class="text-muted2 small">{{ alert.source_event.occurred_at|date:"M d, Y H:i:s" }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── Sidebar ── #}
+  <div class="col-lg-4">
+    {# ── Status Card ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Status</span></div>
+      <div class="hs-card-body">
+        <div class="mb-3">
+          <small class="text-muted2">Current Status</small>
+          <p class="mb-0">
+            <span class="badge {% if alert.status == 'NEW' %}bg-primary{% elif alert.status == 'ACK' %}bg-info{% elif alert.status == 'IN_PROGRESS' %}bg-warning{% elif alert.status == 'RESOLVED' %}badge-low{% elif alert.status == 'CLOSED' %}bg-secondary{% else %}bg-secondary{% endif %}">
+              {{ alert.get_status_display }}
+            </span>
+          </p>
+        </div>
+        <div class="mb-3">
+          <small class="text-muted2">Severity</small>
+          <p class="mb-0">
+            <span class="badge {% if alert.severity == 'CRITICAL' %}bg-danger{% elif alert.severity == 'HIGH' %}badge-high{% elif alert.severity == 'MEDIUM' %}badge-medium{% else %}badge-low{% endif %}">
+              {{ alert.severity }}
+            </span>
+          </p>
+        </div>
+        <div>
+          <small class="text-muted2">Read Status</small>
+          <p class="mb-0">
+            {% if alert.is_read %}
+            <i class="fa-solid fa-check" style="color:var(--hs-health-grn);"></i> Read
+            {% if alert.read_at %}<small class="text-muted2">{{ alert.read_at|date:"M d, Y H:i" }}</small>{% endif %}
+            {% else %}
+            <i class="fa-solid fa-circle-dot" style="color:var(--hs-cyber);"></i> Unread
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {# ── Assignment ── #}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Assignment</span></div>
+      <div class="hs-card-body">
+        <p class="mb-0">
+          {% if alert.assigned_to %}
+          <i class="fa-solid fa-user me-2" style="color:var(--hs-health-grn);"></i>
+          <strong>{{ alert.assigned_to.username }}</strong>
+          {% else %}
+          <i class="fa-solid fa-ban me-2 text-muted2"></i>
+          <span class="text-muted2">Unassigned</span>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    {# ── Affected System ── #}
+    {% if alert.affected_system %}
+    <div class="hs-card mb-3">
+      <div class="hs-card-header"><span class="hs-card-title">Affected System</span></div>
+      <div class="hs-card-body">
+        <p class="mb-0"><strong>{{ alert.affected_system.name }}</strong></p>
+        <small class="text-muted2">{{ alert.affected_system.get_system_type_display }}</small>
+      </div>
+    </div>
+    {% endif %}
+
+    {# ── Timeline ── #}
+    <div class="hs-card">
+      <div class="hs-card-header"><span class="hs-card-title">Timeline</span></div>
+      <div class="hs-card-body">
+        <small class="d-block text-muted2 mb-2">
+          <i class="fa-solid fa-circle-plus text-cyber me-1"></i>
+          Created: {{ alert.created_at|date:"M d, Y H:i" }}
+        </small>
+        {% if alert.acknowledged_at %}
+        <small class="d-block text-muted2 mb-2">
+          <i class="fa-solid fa-check text-info me-1"></i>
+          Acknowledged: {{ alert.acknowledged_at|date:"M d, Y H:i" }}
+          {% if alert.acknowledged_by %}<br><span class="ms-3">by {{ alert.acknowledged_by.username }}</span>{% endif %}
+        </small>
+        {% endif %}
+        {% if alert.resolved_at %}
+        <small class="d-block text-muted2">
+          <i class="fa-solid fa-check-circle" style="color:var(--hs-health-grn);" me-1></i>
+          Resolved: {{ alert.resolved_at|date:"M d, Y H:i" }}
+          {% if alert.resolved_by %}<br><span class="ms-3">by {{ alert.resolved_by.username }}</span>{% endif %}
+        </small>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

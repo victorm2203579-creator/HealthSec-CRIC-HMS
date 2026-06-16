@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block title %}Risk Dashboard{% endblock %}
+{% block page_title %}Cyber Risk Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .risk-score-ring { width:140px; height:140px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; border:6px solid; }
+  .ring-low    { border-color:var(--hs-health-grn); color:var(--hs-health-grn); }
+  .ring-medium { border-color:var(--hs-warning);    color:var(--hs-warning); }
+  .ring-high   { border-color:var(--hs-danger);     color:var(--hs-danger); }
+  .ring-critical { border-color:#ff006e; color:#ff006e; animation:glow-pulse 1.5s infinite; }
+  @keyframes glow-pulse { 0%,100%{box-shadow:0 0 6px rgba(255,0,110,.4)} 50%{box-shadow:0 0 20px rgba(255,0,110,.8)} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+  <div>
+    <h1><i class="fa-solid fa-shield-virus me-2 text-cyber"></i>Cyber Risk Intelligence</h1>
+    <p class="text-muted2 mb-0">Real-time threat monitoring and risk scoring</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'risk_engine:threat_event_list' %}" class="btn btn-sm btn-hs-outline">
+      <i class="fa-solid fa-list me-1"></i> All Threats
+    </a>
+    <a href="{% url 'risk_engine:risk_assessment' %}" class="btn btn-sm btn-hs-primary">
+      <i class="fa-solid fa-clipboard-check me-1"></i> Assessments
+    </a>
+  </div>
+</div>
+
+{# ── Overall Risk Score + KPIs ── #}
+<div class="row g-3 mb-4 align-items-stretch">
+  <div class="col-lg-3 d-flex align-items-center justify-content-center">
+    <div class="hs-card w-100 text-center py-4">
+      <p class="text-muted2 mb-2 fw-semibold text-uppercase" style="font-size:.75rem;letter-spacing:.08em;">Overall Risk Score</p>
+      <div class="risk-score-ring ring-{{ risk_level|lower }} mx-auto mb-2">
+        <span style="font-size:2rem;font-weight:700;">{{ overall_score }}</span>
+        <small style="font-size:.65rem;opacity:.7;">/100</small>
+      </div>
+      <span class="badge fs-6 {{ risk_level_badge }}">{{ risk_level }}</span>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <div class="row g-3 h-100">
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card {% if open_count %}glow-danger{% endif %}" style="--kpi-accent:var(--hs-danger);">
+          <div class="kpi-value" style="color:var(--hs-danger);">{{ open_count }}</div>
+          <div class="kpi-label">Open Threats</div>
+          <i class="fa-solid fa-fire kpi-icon" style="color:var(--hs-danger);"></i>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card" style="--kpi-accent:#ff006e;">
+          <div class="kpi-value" style="color:#ff006e;">{{ critical_count }}</div>
+          <div class="kpi-label">Critical Severity</div>
+          <i class="fa-solid fa-skull-crossbones kpi-icon" style="color:#ff006e;"></i>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card" style="--kpi-accent:var(--hs-warning);">
+          <div class="kpi-value" style="color:var(--hs-warning);">{{ unpatched_vulns }}</div>
+          <div class="kpi-label">Unpatched Vulns</div>
+          <i class="fa-solid fa-bug kpi-icon" style="color:var(--hs-warning);"></i>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="kpi-card" style="--kpi-accent:var(--hs-cyber-blue);">
+          <div class="kpi-value" style="color:var(--hs-cyber-blue);font-size:1rem;">
+            {% if last_assessment %}{{ last_assessment.conducted_at|date:"d M" }}{% else %}—{% endif %}
+          </div>
+          <div class="kpi-label">Last Assessment</div>
+          <i class="fa-solid fa-calendar-check kpi-icon text-cyber"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {# ── 30-Day Trend Chart ── #}
+  <div class="col-lg-8">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-line me-2 text-cyber"></i>30-Day Threat Trend</span>
+        <small class="text-muted2">Daily threat event count</small>
+      </div>
+      <div class="hs-card-body">
+        <div style="position:relative;height:240px;"><canvas id="trendChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Severity Doughnut ── #}
+  <div class="col-lg-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-pie me-2 text-cyber"></i>Severity Mix</span>
+      </div>
+      <div class="hs-card-body d-flex align-items-center justify-content-center">
+        <div style="position:relative;height:240px;width:240px;"><canvas id="sevChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {# ── Recent Threat Events ── #}
+  <div class="col-lg-8">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-bolt me-2 text-danger"></i>Recent Open Threats</span>
+        <a href="{% url 'risk_engine:threat_event_list' %}" class="btn btn-xs btn-hs-outline">View All</a>
+      </div>
+      <div class="hs-card-body p-0">
+        <div class="table-responsive">
+          <table class="table hs-table mb-0">
+            <thead><tr>
+              <th>Type</th><th>Severity</th><th>Target</th><th>Detected</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              {% for evt in recent_events %}
+              <tr>
+                <td><small>{{ evt.get_threat_type_display }}</small></td>
+                <td><span class="badge {{ evt.get_severity_badge_class }}">{{ evt.get_severity_display }}</span></td>
+                <td class="text-truncate" style="max-width:160px;"><small>{{ evt.target_resource }}</small></td>
+                <td><small class="text-muted2">{{ evt.detected_at|timesince }} ago</small></td>
+                <td><span class="badge {{ evt.get_status_badge_class }}">{{ evt.get_status_display }}</span></td>
+                <td>
+                  <a href="{% url 'risk_engine:threat_event_detail' evt.pk %}" class="btn btn-xs btn-hs-outline">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center text-muted2 py-4">No open threats.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Legacy Risk Scores + Compute ── #}
+  <div class="col-lg-4">
+    <div class="hs-card">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-calculator me-2 text-cyber"></i>System Risk Scores</span>
+      </div>
+      <div class="hs-card-body">
+        {% if systems %}
+        <form method="post" action="{% url 'risk_engine:compute_risk_score' 0 %}" id="computeForm">
+          {% csrf_token %}
+          <div class="mb-2">
+            <select name="system_pk" class="form-select form-select-sm" id="systemSelect"
+                    style="background:var(--hs-surface-2);border-color:var(--hs-border);color:var(--hs-text);">
+              {% for sys in systems %}
+              <option value="{{ sys.pk }}">{{ sys.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-sm btn-hs-primary w-100">
+            <i class="fa-solid fa-play me-1"></i> Compute Score
+          </button>
+        </form>
+        <hr style="border-color:var(--hs-border);">
+        {% endif %}
+
+        {% for rs in legacy_scores %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <small class="text-truncate" style="max-width:130px;">{{ rs.system.name }}</small>
+          <div class="d-flex align-items-center gap-2">
+            <strong style="font-size:.9rem;">{{ rs.score }}</strong>
+            <span class="badge
+              {% if rs.risk_level == 'CRITICAL' %}badge-critical
+              {% elif rs.risk_level == 'HIGH' %}badge-high
+              {% elif rs.risk_level == 'MEDIUM' %}badge-medium
+              {% else %}badge-low{% endif %}">{{ rs.risk_level }}</span>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted2 text-center">No scores yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const trendLabels = {{ trend_labels_json|safe }};
+const trendValues = {{ trend_values_json|safe }};
+const sevCounts   = {{ sev_counts_json|safe }};
+
+// ── 30-Day Threat Trend ──────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('trendChart');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var gradient = ctx.createLinearGradient(0, 0, 0, 300);
+  gradient.addColorStop(0, 'rgba(91,71,251,0.25)');
+  gradient.addColorStop(1, 'rgba(91,71,251,0.00)');
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Threat Events',
+        data: trendValues,
+        borderColor: '#5b47fb',
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#5b47fb',
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 6,
+        borderWidth: 2.5,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15,20,40,0.92)',
+          titleColor: '#e2e8f0',
+          bodyColor: '#94a3b8',
+          borderColor: 'rgba(91,71,251,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            title: function(items) { return items[0].label; },
+            label: function(item) { return '  Threats: ' + item.raw; }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b', font: { size: 11 }, maxTicksLimit: 10 },
+          grid: { color: 'rgba(100,116,139,0.1)', drawBorder: false }
+        },
+        y: {
+          ticks: { color: '#64748b', font: { size: 11 }, precision: 0 },
+          grid: { color: 'rgba(100,116,139,0.1)', drawBorder: false },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+})();
+
+// ── Severity Mix Doughnut ──────────────────────────────────────
+(function() {
+  var total = (sevCounts.LOW||0) + (sevCounts.MEDIUM||0) + (sevCounts.HIGH||0) + (sevCounts.CRITICAL||0);
+  new Chart(document.getElementById('sevChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Low', 'Medium', 'High', 'Critical'],
+      datasets: [{
+        data: [sevCounts.LOW||0, sevCounts.MEDIUM||0, sevCounts.HIGH||0, sevCounts.CRITICAL||0],
+        backgroundColor: ['#10b981', '#f59e0b', '#f97316', '#ef4444'],
+        borderColor: 'transparent',
+        hoverOffset: 6,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#64748b',
+            boxWidth: 10,
+            boxHeight: 10,
+            padding: 12,
+            font: { size: 12 }
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,20,40,0.92)',
+          titleColor: '#e2e8f0',
+          bodyColor: '#94a3b8',
+          borderColor: 'rgba(91,71,251,0.4)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: function(item) {
+              var pct = total > 0 ? ((item.raw / total) * 100).toFixed(1) : 0;
+              return '  ' + item.label + ': ' + item.raw + ' (' + pct + '%)';
+            }
+          }
+        }
+      }
+    }
+  });
+})();
+
+// Fix system compute form URL dynamically
+document.getElementById('computeForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const pk = document.getElementById('systemSelect').value;
+  this.action = `/risk/compute/${pk}/`;
+  this.submit();
+});
+</script>
+{% endblock %}

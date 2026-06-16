@@ -1,0 +1,219 @@
+Main Dashboard (/dashboard/)
+What it does: The command center. Aggregates data from every module into one view.
+
+Features:
+
+KPI cards — total open alerts, active healthcare systems, open threats, compliance score
+Alert trend chart — line chart showing alert volume over the last 30 days
+Severity breakdown donut — shows proportion of Low/Medium/High/Critical alerts
+Recent alerts table — last 5 alerts with severity badge and status
+Recent monitoring events — last 5 events from healthcare systems
+Who sees what: Everyone sees the dashboard. Action buttons (like "Generate Assessment") only appear for Admins/Analysts.
+
+Monitoring
+Healthcare Systems (/monitoring/)
+What it does: Lists all registered healthcare facilities/systems being monitored.
+
+Features:
+
+System name, type (Hospital, Clinic, Lab, etc.), status badge (Active/Degraded/Maintenance/Offline)
+PHI flag — whether the system handles Protected Health Information
+Risk level badge per system
+Click a system → detail view showing its monitoring events, data assets, and risk history
+How to use: Add systems via /admin/monitoring/healthcaresystem/add/
+
+Monitoring Events (/monitoring/events/)
+What it does: Log of all security/operational events detected across healthcare systems.
+
+Features:
+
+Filter by system, event type, severity, date range
+Each event shows: timestamp, system affected, event type, severity, description
+Analysts can mark events as reviewed
+Access Logs (/monitoring/access-logs/)
+What it does: Records every access to patient data and system resources.
+
+Features:
+
+Who accessed what, when, from which IP
+Filter by user, resource type, date
+CSV export — download the full log as a spreadsheet
+Flags suspicious access patterns
+Suspicious Activity (/monitoring/suspicious/)
+What it does: Surfaces anomalous access events flagged by the monitoring engine.
+
+Features:
+
+Filter by status (Unresolved/Resolved), severity, activity type
+Each record shows what was flagged and why
+Analysts can resolve suspicious activity entries (marks them investigated)
+Currently empty because no anomalies have been detected yet
+Patient Records (/monitoring/records/)
+What it does: Tracks which patient records exist in the system and logs every access to them (HIPAA audit trail).
+
+Features:
+
+Every time a patient record is viewed, an access log entry is created automatically
+Compliance officers can see the full access history per record
+This is the PHI audit trail for HIPAA compliance
+Risk Engine
+Risk Dashboard (/risk/)
+What it does: Real-time cyber risk posture overview.
+
+Features:
+
+Overall Risk Score ring (0–100) with level badge (Low/Medium/High/Critical)
+KPI cards: Open Threats, Critical Severity count, Unpatched Vulnerabilities, Last Assessment date
+30-Day Threat Trend — line chart of daily threat event volume
+Severity Mix donut — proportion of Low/Medium/High/Critical threats
+Recent Open Threats table — latest unresolved threats with type, severity, target
+System Risk Scores panel — select a healthcare system and click "Compute Score" to run the scoring algorithm
+How to compute a score: Select a system from the dropdown → click "Compute Score" → the algorithm runs and saves a RiskScore record.
+
+Threat Events (/risk/threats/)
+What it does: Full list of all cyber threat events detected or manually entered.
+
+Features:
+
+Filter by type, severity, status
+Each threat shows: type (Ransomware, Phishing, Data Breach, etc.), target resource, detected timestamp, status
+Click a threat → detail view with full description and ability to update status
+How to add threats: Via /admin/risk_engine/threatevent/add/ or the API.
+
+Vulnerabilities (/risk/vulnerabilities/)
+What it does: CVE/vulnerability tracker for all systems.
+
+Features:
+
+Filter by severity, patch status
+Shows CVE ID, affected system, CVSS score, patch status
+Analysts can mark a vulnerability as patched (POST to /risk/vulnerabilities/{id}/patch/)
+Threat Intel (/risk/threat-intel/)
+What it does: Threat intelligence feed management — external threat data sources.
+
+Features:
+
+Lists configured threat intelligence feeds (e.g. MISP, commercial feeds)
+Shows feed name, source, last updated, status
+Assessments (/risk/assessment/)
+What it does: Historical risk assessment snapshots — a point-in-time record of the system's risk posture.
+
+Features:
+
+Assessment Trend chart — score over time across last 15 assessments
+Assessment Stats — total count, average score
+Assessment History table — date, score, level, who ran it, next due date, top threats
+Generate Assessment button — runs a full risk assessment and saves a snapshot
+How to generate: Click "Generate Assessment" → the system queries all open threats, vulnerabilities, and PHI assets → calculates a composite score → saves it → appears in the history table.
+
+Compliance
+Overview/Dashboard (/compliance/)
+What it does: Regulatory compliance posture across all active frameworks (HIPAA, NDPR, ISO 27001).
+
+Features:
+
+Overall Compliance Score gauge — weighted average across all frameworks
+KPI cards: Controls Passing, Failing, Partial, Total
+Framework Compliance Scores bar chart — per-framework horizontal bars
+Control Status donut — Pass/Fail/Partial/Pending breakdown
+Framework Summary cards — individual score bar + pass/fail/partial counts per framework
+Recent Check Results table — last 15 automated check results
+Run Automated Check button (Compliance Officers only) — triggers all automated checks
+How to run a check: Log in as compliance1 → click "Run Automated Check" → results appear in the table.
+
+Frameworks (/compliance/frameworks/)
+What it does: Lists all registered compliance frameworks.
+
+Features:
+
+Framework name, short name, version, applicable region, control count
+Click a framework → see all its controls with their latest check status
+Controls (/compliance/controls/)
+What it does: Full list of all compliance controls across all frameworks.
+
+Features:
+
+Filter by framework, category, status
+Shows control code, title, framework, category, weight, latest result
+"Auto" badge on controls that can be checked automatically
+Remediation (/compliance/remediation/)
+What it does: Action list — all controls that are Failing, Partial, or Pending with remediation guidance.
+
+Features:
+
+Shows only controls needing attention (fail/partial/pending)
+Stats: how many failing vs partial vs pending
+Manual status override (Compliance Officers only) — select a new status and add notes → creates a new check result. Use this when you've manually fixed something and want to record it.
+How to override: On remediation page, find the control → select new status from dropdown → add notes → submit.
+
+Reports (/compliance/reports/)
+What it does: Historical compliance report snapshots generated after each automated check run.
+
+Features:
+
+Shows all past reports with framework, score, level, date generated, by whom
+Score delta — how much the score changed since the last report
+Reports are auto-created when you click "Run Automated Check" on the dashboard
+Alerts
+Alert List (/alerts/)
+What it does: All security alerts generated by the system.
+
+Features:
+
+Filter by severity (Low/Medium/High/Critical), status (Open/Acknowledged/Resolved)
+Each alert shows: title, severity badge, status, timestamp, assigned to
+Acknowledge — confirms an analyst has seen the alert
+Resolve — closes the alert with a resolution note
+Mark all read — clears the notification badge in the top bar
+How to acknowledge: Click an alert → "Acknowledge" button → status changes to Acknowledged.
+
+Incidents (/alerts/incidents/)
+What it does: Full incident management for major security events.
+
+Features:
+
+Create incidents linked to alerts
+Phase tracking: Detection → Containment → Eradication → Recovery → Post-Incident
+Each incident has a timeline, assigned responder, severity, status
+Detail view shows full incident record with phase transition history
+How to create: Alerts list → open an alert detail → "Create Incident" (or directly from /alerts/incidents/create/).
+
+Audit Log (/audit/)
+Access: Compliance Officers and Admins only.
+
+What it does: Immutable record of every significant action in the system. Cannot be edited or deleted.
+
+Features:
+
+Every login, logout, POST, PUT, PATCH, DELETE is logged automatically via middleware
+Manual log_event() calls add entries for key business actions (compliance checks, report generation, user creation, etc.)
+Filter by event type, user, date range
+Export — download the full audit log
+Integrity check — verifies no records have been tampered with
+Reports (/reports/)
+What it does: Generate and download PDF reports.
+
+Features:
+
+Risk Summary Report — click "Risk Report" → downloads a PDF with current risk score, top threats, vulnerability summary, recommendations. Built with ReportLab, no temp files.
+Compliance Report — click "Compliance Report" → choose a framework → downloads a PDF with control statuses, score, pass/fail breakdown
+How to generate: Click either button → PDF downloads immediately to your browser.
+
+Users (/accounts/user_list/)
+Access: Admin only.
+
+What it does: User management.
+
+Features:
+
+View all registered users with their roles
+Register new users (/accounts/register/) — set username, email, password, and role
+Each user has a profile page (/accounts/profile/) to update their own info and change password
+Settings (/dashboard/settings/)
+Access: Admin only.
+
+What it does: System-level configuration and maintenance controls (data purge, system settings).
+
+The Notification Bell (top-right)
+Shows count of unread alerts. Clicking it opens a drawer with the latest alerts. The count updates in real-time on every page load via a context processor that runs on every request.
+

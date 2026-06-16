@@ -1,0 +1,1121 @@
+================================================================================
+HEALTHSEC CRIC HMS - COMPLETE SYSTEM GUIDE
+Cyber Risk Intelligence & Compliance Healthcare Information Monitoring System
+================================================================================
+
+TABLE OF CONTENTS
+================================================================================
+1. WHAT IS HEALTHSEC?
+2. THE SYSTEM AT A GLANCE
+3. DETAILED PAGE BREAKDOWN
+4. HOW TO USE THE SYSTEM
+5. KEY FEATURES EXPLAINED
+6. WORKING SCENARIOS
+7. TROUBLESHOOTING
+8. TECHNICAL DETAILS FOR USERS
+
+
+================================================================================
+1. WHAT IS HEALTHSEC?
+================================================================================
+
+HEALTHSEC is a system designed for hospitals and healthcare facilities to:
+
+• Track and monitor security risks in their computer systems
+• Check if they're following healthcare regulations (HIPAA, NDPR, ISO 27001)
+• Keep a record of who accessed patient data and when
+• Generate compliance reports for regulatory audits
+• Alert staff when security threats are detected
+• Maintain an unchangeable audit trail for legal purposes
+
+Think of it like a "Security Guard" for a hospital's digital systems that:
+- Watches for suspicious activity
+- Makes sure rules are being followed
+- Keeps detailed records of everything that happens
+- Alerts management when there's a problem
+
+
+================================================================================
+2. THE SYSTEM AT A GLANCE
+================================================================================
+
+HEALTHSEC has 7 Main Areas:
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         DASHBOARD (Home Page)                           │
+│ Shows you everything at a glance: total alerts, systems, risks, scores  │
+└─────────────────────────────────────────────────────────────────────────┘
+         ↓
+┌──────────────────────────────────────────────────────────────────────────┐
+│  MONITORING   │  RISK ENGINE  │  COMPLIANCE  │  ALERTS  │  AUDIT  │  RPT │
+├───────────────┼───────────────┼──────────────┼──────────┼─────────┼──────┤
+│ Track systems │ Measure risks │ Check rules  │ Handle   │ Keep    │ Print│
+│ and access    │ and threats   │ compliance   │ incidents│ records │ docs │
+└───────────────┴───────────────┴──────────────┴──────────┴─────────┴──────┘
+
+
+================================================================================
+3. DETAILED PAGE BREAKDOWN
+================================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.1 DASHBOARD (Main Home Page)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Your control center - shows everything in one view
+WHY: You can see at a glance if anything is wrong
+WHAT YOU SEE:
+  • Big number cards showing:
+    - Total open alerts
+    - Active healthcare systems
+    - Open security threats
+    - Overall compliance score (0-100%)
+  • Charts showing:
+    - Alert trends (are alerts increasing or decreasing?)
+    - Where alerts come from (by severity: low, medium, high, critical)
+  • Recent alerts list - the latest things that happened
+
+HOW TO USE:
+  1. Log in with your username/password
+  2. Click "Dashboard" in the left menu
+  3. Look at the numbers - if "Open Threats" is high, investigate
+  4. Scroll down to see recent alerts
+  5. Click on any alert to see details
+
+REAL WORLD EXAMPLE:
+  "At 9am, Hospital Manager logs in. The dashboard shows:
+   - 3 open alerts
+   - 12 active systems
+   - 2 open threats
+   He sees a 'CRITICAL' alert about someone accessing patient records at 2am.
+   He clicks on it to investigate."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.2 MONITORING - Healthcare Systems
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Lists all computer systems in the hospital
+WHY: You need to know what systems exist and if they're working properly
+WHAT YOU SEE:
+  • System name (e.g., "Main EHR", "Lab Database")
+  • System type (EHR = patient records, Lab = lab tests, Pharmacy = medicines)
+  • Status (Active, Degraded, Maintenance, Offline)
+  • Whether it handles patient data (contains PHI)
+  • Risk level (Low, Medium, High, Critical)
+
+HOW TO USE:
+  1. Click "Monitoring" → "Healthcare Systems"
+  2. See all your hospital's systems
+  3. Green "Active" = system is working fine
+  4. Red "Offline" = system is down, may need attention
+  5. Click on a system to see details
+
+REAL WORLD EXAMPLE:
+  "Hospital has 5 systems:
+   - Main EHR (Active) - patient records system
+   - Lab System (Degraded) - lab tests system, running slow
+   - Pharmacy (Active) - medicine dispensing
+   - Email (Maintenance) - being updated
+   - Backup (Active) - backup system"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.3 MONITORING - Suspicious Activity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Flags unusual access to patient records
+WHY: Detect if someone is accessing data they shouldn't access
+WHAT GETS FLAGGED:
+  • Access at 2am (hospitals work 9-5, so 2am is suspicious)
+  • Accessing many records in a short time (e.g., 100 records in 1 hour)
+  • Accessing records outside your department
+  • Accessing critical patient records
+  • Using a new/unknown device
+
+HOW TO USE:
+  1. Click "Monitoring" → "Suspicious Activity"
+  2. See all flagged suspicious accesses
+  3. If you see something suspicious, click it
+  4. Investigate: Was this legitimate? (e.g., Dr. Smith had to work late?)
+  5. Click "Resolve" to mark it as checked
+
+REAL WORLD EXAMPLE:
+  "Janitor accesses 50 patient records at 3am from a new device.
+   System flags this as suspicious because:
+   - Janitor isn't a clinician
+   - 3am is outside work hours
+   - Accessing way too many records
+
+   Manager investigates: Janitor's account was hacked!
+   Clicks 'Resolve' to mark the investigation done,
+   Changes janitor's password."
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.4 RISK ENGINE - Risk Dashboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Shows your hospital's current cyber risk score
+WHY: Measure how vulnerable you are to cyber attacks
+WHAT YOU SEE:
+  • Overall Risk Score (0-100)
+    - 0-40 = Low risk (good)
+    - 40-70 = Medium risk (getting risky)
+    - 70-100 = High risk (very dangerous)
+  • Number of open threats
+  • Number of unpatched vulnerabilities (security fixes not applied)
+  • Charts showing threat trends
+  • List of recent threats
+
+HOW TO USE:
+  1. Click "Risk Engine" → "Risk Dashboard"
+  2. Look at the big score - is it red (bad) or green (good)?
+  3. If score is high:
+     - Check "Open Threats" - what's wrong?
+     - Check "Unpatched Vulns" - what needs to be fixed?
+  4. Scroll down to see recent threats
+
+REAL WORLD EXAMPLE:
+  "Risk score is 72 (CRITICAL - red).
+   Reasons:
+   - 5 open threats (ransomware attempts)
+   - 12 unpatched vulnerabilities (Windows updates not installed)
+
+   Hospital IT manager:
+   1. Patches all Windows updates
+   2. Activates antivirus scanning
+   3. Checks the threats
+
+   Score drops to 45 (medium) - much better!"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.5 RISK ENGINE - Threat Events
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Detailed list of every cyber threat detected
+WHY: Understand what threats are happening so you can fix them
+WHAT YOU SEE:
+  • Threat type (Ransomware, Phishing, Unauthorized Access, etc.)
+  • Severity (Low, Medium, High, Critical)
+  • Target (which computer/system was attacked)
+  • Status (Open = still happening, Mitigated = fixed)
+  • When it was detected
+
+HOW TO USE:
+  1. Click "Risk Engine" → "Threats"
+  2. See all threats detected
+  3. Filter by severity if you want
+  4. Click a threat to see details
+  5. If you fixed it, mark status as "Mitigated"
+
+REAL WORLD EXAMPLE:
+  "Threats list shows:
+   - Brute Force Attack on Email (HIGH, Open)
+   - Phishing Email Campaign (MEDIUM, Open)
+   - SQL Injection Attempt (CRITICAL, Mitigated)
+
+   IT staff:
+   - Blocks the brute force attacker's IP address
+   - Warns staff about phishing emails
+   - Sees the SQL injection is already fixed"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.6 RISK ENGINE - Vulnerabilities
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: List of security weaknesses (CVEs) that need to be fixed
+WHY: These are known problems that hackers can exploit
+WHAT YOU SEE:
+  • CVE ID (official vulnerability ID)
+  • Title and description
+  • CVSS Score (severity: 0-10, higher = worse)
+  • Patch status (Unpatched = needs fixing, Patched = already fixed)
+  • Affected system
+
+HOW TO USE:
+  1. Click "Risk Engine" → "Vulnerabilities"
+  2. See all unpatched vulnerabilities
+  3. Click the red "Unpatched" ones - these are urgent
+  4. When you install a security patch, mark it as "Patched"
+
+REAL WORLD EXAMPLE:
+  "Vulnerabilities list shows:
+   CVE-2024-5678 (Windows Update) - Unpatched - CVSS 9.8
+   CVE-2024-4567 (Apache) - Unpatched - CVSS 7.2
+
+   IT manager:
+   - Installs Windows update
+   - Marks CVE-2024-5678 as 'Patched'
+   - Updates Apache web server
+   - Marks CVE-2024-4567 as 'Patched'"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.7 RISK ENGINE - Assessments
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: A snapshot of your risk at a specific point in time
+WHY: Track how your risk changes over time (is it getting better or worse?)
+WHAT YOU SEE:
+  • Assessment date
+  • Overall risk score on that date
+  • Top threats at that time
+  • Trend chart (risk over the last 30 days)
+
+HOW TO USE:
+  1. Click "Risk Engine" → "Assessments"
+  2. Click "Generate Assessment" to create a new snapshot
+  3. System will analyze all threats, vulnerabilities, and security issues
+  4. Shows you the overall risk at this moment
+  5. Useful for showing management how risk is improving or worsening
+
+REAL WORLD EXAMPLE:
+  "Hospital generates assessment on Jan 1:
+   - Risk score: 65 (Medium)
+
+   They work on security for a month...
+
+   Hospital generates assessment on Feb 1:
+   - Risk score: 42 (Lower)
+
+   Shows: We improved our security!"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.8 COMPLIANCE - Dashboard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Shows if you're following healthcare regulations
+WHY: Hospitals MUST follow HIPAA, NDPR, ISO 27001 rules or face fines/lawsuits
+WHAT YOU SEE:
+  • Overall Compliance Score (0-100%)
+    - 0-40% = Not compliant (in violation!)
+    - 40-70% = Partially compliant (need to fix)
+    - 70-100% = Compliant (good!)
+  • Per-framework scores (HIPAA, NDPR, ISO 27001)
+  • Count of controls (rules):
+    - Passing (you're following them)
+    - Failing (you're not following them)
+    - Partial (you're doing some but not all)
+
+HOW TO USE:
+  1. Click "Compliance" → "Dashboard"
+  2. Look at overall score - aim for 90%+ to be safe
+  3. If score is low, click "Run Automated Check"
+  4. System tests all compliance rules and reports results
+  5. Go to "Remediation" to fix failing controls
+
+REAL WORLD EXAMPLE:
+  "Hospital compliance score: 75% (mostly compliant)
+
+   Breakdown:
+   - HIPAA: 82% (good)
+   - NDPR: 71% (needs work)
+   - ISO 27001: 73% (needs work)
+
+   Hospital:
+   - Runs compliance check
+   - Sees 3 NDPR controls failing (password policies)
+   - Updates password rules to meet NDPR requirements
+   - Score improves to 85%"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.9 COMPLIANCE - Controls
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: List of every compliance rule (control) the hospital must follow
+WHY: Track which rules you're following and which you're breaking
+WHAT YOU SEE:
+  • Control code (e.g., HIPAA-1.1)
+  • Control title (e.g., "Access control policy")
+  • Framework (HIPAA, NDPR, ISO 27001)
+  • Status: Passing, Failing, Partial, or Not Checked
+  • Weight (how important is this rule?)
+
+HOW TO USE:
+  1. Click "Compliance" → "Controls"
+  2. Filter by framework or status
+  3. Look for red "Failing" controls
+  4. Click on one to see what needs to be fixed
+  5. When you fix it, update the status
+
+REAL WORLD EXAMPLE:
+  "Control: HIPAA-2.3 - Audit Log Management
+   Status: FAILING
+   Issue: Audit logs not retained for 6 years
+
+   Hospital:
+   - Implements log retention policy
+   - Backs up logs to secure storage
+   - Status changes to PASSING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.10 COMPLIANCE - Remediation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Your to-do list for fixing compliance problems
+WHY: Shows what needs to be fixed to improve compliance score
+WHAT YOU SEE:
+  • All failing/partial controls
+  • What's wrong with each
+  • Instructions for fixing
+  • Manual override option (if you know something is fixed but system doesn't know)
+
+HOW TO USE:
+  1. Click "Compliance" → "Remediation"
+  2. See all problems that need fixing
+  3. Read what each control requires
+  4. Fix the problem in your systems
+  5. Update the control status
+  6. Watch your compliance score improve
+
+REAL WORLD EXAMPLE:
+  "Remediation shows 5 problems:
+   1. Password policy not strong enough
+   2. Encryption not enabled on database
+   3. No 2-factor authentication
+   4. Backup not tested in 6 months
+   5. Audit logs not kept long enough
+
+   Hospital IT:
+   - Implements strong passwords
+   - Enables database encryption
+   - Deploys 2FA tokens
+   - Tests backup recovery
+   - Sets up 6-year log retention
+
+   All 5 controls now show PASSING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.11 ALERTS - List
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: All security incidents that need attention
+WHY: Respond to problems before they become disasters
+WHAT YOU SEE:
+  • Alert title (what happened)
+  • Severity (Low, Medium, High, Critical)
+  • Status (New, Acknowledged, Resolved)
+  • When it happened
+  • Who it's assigned to
+
+HOW TO USE:
+  1. Click "Alerts"
+  2. Red "CRITICAL" alerts need immediate attention
+  3. Click "Acknowledge" to say "I saw this"
+  4. Click "Resolve" when you've fixed it
+  5. Add notes about what you did
+
+REAL WORLD EXAMPLE:
+  "Alert: Failed login attempts on Admin account (CRITICAL)
+   Status: New
+
+   Manager:
+   1. Clicks 'Acknowledge' to say they're handling it
+   2. Investigates: Someone trying to hack admin account
+   3. Changes admin password
+   4. Enables IP restriction on admin login
+   5. Clicks 'Resolve' with notes: 'Password changed, IP lock enabled'"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.12 ALERTS - Incidents
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Major security events that need a formal response
+WHY: Big incidents need coordination and documentation
+WHAT YOU SEE:
+  • Incident number
+  • Incident title
+  • Phase: Detection → Containment → Eradication → Recovery
+  • Commander (who's in charge)
+  • Related alerts
+  • Timeline of events
+
+HOW TO USE:
+  1. Click "Alerts" → "Incidents"
+  2. Create new incident from critical alerts
+  3. Assign incident commander
+  4. Move through phases: Detect → Contain → Eradicate → Recover
+  5. Each phase documents what you did
+
+REAL WORLD EXAMPLE:
+  "Incident #2026-001: Ransomware Attack
+
+   Detection Phase:
+   - May 26, 9am: Ransomware detected on 3 computers
+
+   Containment Phase:
+   - May 26, 10am: Isolated infected computers from network
+   - May 26, 11am: Blocked attacker's IP address
+
+   Eradication Phase:
+   - May 26, 2pm: Cleaned infected computers
+   - May 26, 3pm: Closed vulnerability attacker used
+
+   Recovery Phase:
+   - May 26, 5pm: Restored from backup
+   - May 26, 6pm: Brought computers back online
+
+   Result: Incident closed, no data lost, good documentation for insurance"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.13 AUDIT LOG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Unchangeable record of everything that happened in the system
+WHY: Legal requirement - proves you didn't tamper with records
+WHAT YOU SEE:
+  • What action happened
+  • Who did it
+  • When it happened
+  • IP address they came from
+  • Computer/device they used
+  • What they changed (old value → new value)
+
+HOW TO USE:
+  1. Click "Audit Log"
+  2. Can't modify these records - they're locked for legal reasons
+  3. Use for investigations: "Who accessed this file?"
+  4. Use for compliance: "Prove you didn't delete audit logs"
+  5. Export for auditors if needed
+
+IMPORTANT: These records are unchangeable and cryptographically signed.
+Hackers can't erase their tracks. Auditors can verify nothing was tampered with.
+
+REAL WORLD EXAMPLE:
+  "Hospital under investigation: 'Did someone delete patient records?'
+
+   Hospital shows audit log:
+   - No deletion events in the log
+   - Cryptographic signature proves log hasn't been tampered with
+   - Hospital is cleared of wrongdoing"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3.14 REPORTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WHAT: Printable compliance and risk reports for executives and auditors
+WHY: Show regulators and management that you're secure and compliant
+WHAT YOU GET:
+  • Risk Summary Report (PDF)
+    - Current risk score
+    - Top threats
+    - Recommendations for improvement
+  • Compliance Report (PDF)
+    - Score per framework (HIPAA, NDPR, ISO 27001)
+    - Which controls are failing
+    - What needs to be fixed
+
+HOW TO USE:
+  1. Click "Reports"
+  2. Click "Generate Risk Report" or "Generate Compliance Report"
+  3. PDF downloads to your computer
+  4. Print or email to management/auditors
+  5. Use for board meetings and regulatory audits
+
+REAL WORLD EXAMPLE:
+  "Hospital board meeting:
+   CEO: 'Are we secure and compliant?'
+
+   IT Director generates Risk & Compliance reports
+   Shows:
+   - Risk score: 45 (Medium, but improving)
+   - Compliance score: 88% (Compliant!)
+   - All critical issues are being addressed
+
+   Board: 'Looks good, keep it up'"
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+PAGES YOU DON'T NEED FOR YOUR FINAL YEAR PROJECT:
+═════════════════════════════════════════════════════════════════════════════
+
+❌ Patient Records - Not essential for project scope
+❌ Access Logs - Redundant with Suspicious Activity page
+❌ User Activity Heatmap - Too advanced for project scope
+❌ Threat Intel Feed - External data source, not core
+❌ ML Status Page - Experimental, not essential
+❌ Settings Page - Admin functionality, not demo-critical
+
+These 6 pages can be removed without affecting the core project.
+Focus on the 8 essential pages for your final presentation.
+
+
+================================================================================
+4. HOW TO USE THE SYSTEM - STEP BY STEP
+================================================================================
+
+FIRST TIME: INITIAL SETUP
+─────────────────────────
+
+Step 1: Create User Accounts
+  □ Go to Users menu
+  □ Create accounts for staff
+  □ Assign roles: Viewer, Analyst, Compliance Officer, Admin
+  □ Give everyone a temporary password
+
+Step 2: Add Healthcare Systems
+  □ Go to Monitoring → Healthcare Systems
+  □ Add each computer system your hospital uses
+  □ Mark which ones handle patient data
+  □ Set status (Active, Degraded, Offline)
+
+Step 3: Configure Compliance Rules
+  □ Go to Compliance
+  □ System comes with HIPAA, NDPR, ISO 27001 rules pre-loaded
+  □ Review each framework to understand requirements
+
+Step 4: First Assessment
+  □ Go to Risk Engine → Assessments
+  □ Click "Generate Assessment"
+  □ Get a baseline risk and compliance score
+
+
+DAILY USE: MORNING CHECK-IN
+───────────────────────────
+
+1. Log in with your account
+2. Dashboard automatically shows any overnight issues
+3. Check for:
+   □ Red "CRITICAL" alerts - these need immediate attention
+   □ New suspicious activity - investigate
+   □ System status changes - any systems down?
+4. Address any critical issues
+5. Log out
+
+
+WEEKLY: COMPLIANCE CHECK
+────────────────────────
+
+Monday morning:
+  □ Go to Compliance → Remediation
+  □ See what controls are failing
+  □ Make a plan to fix them
+  □ Assign fixes to team members
+  □ Track progress
+
+Friday afternoon:
+  □ Check if fixes were completed
+  □ Run automated compliance check
+  □ See if score improved
+
+
+MONTHLY: MANAGEMENT REPORTING
+──────────────────────────────
+
+End of month:
+  □ Generate Risk Report (Reports → Risk Report)
+  □ Generate Compliance Report (Reports → Compliance Report)
+  □ Send to management/board
+  □ Present at executive meeting
+
+
+WHEN SOMETHING GOES WRONG
+─────────────────────────
+
+See a critical alert:
+  1. Click on it to see details
+  2. Understand what happened
+  3. If serious, click "Create Incident"
+  4. Assign incident commander
+  5. Coordinate response
+  6. Document each phase
+  7. When resolved, close incident
+  8. Generate incident report for records
+
+
+================================================================================
+5. KEY FEATURES EXPLAINED
+================================================================================
+
+FEATURE 1: AUTOMATIC THREAT DETECTION
+─────────────────────────────────────
+
+The system automatically analyzes these threat indicators:
+  • Brute force attacks (many failed login attempts)
+  • SQL injection attempts (hacker code in login fields)
+  • Phishing campaigns (suspicious emails)
+  • Privilege escalation (user tries to get admin access)
+  • Data exfiltration (unusual large downloads)
+  • Malware indicators (known malicious files/IPs)
+
+What you do:
+  - System detects threat
+  - System creates alert
+  - You investigate
+  - You take action (block IP, patch, etc.)
+  - You mark as resolved
+
+
+FEATURE 2: COMPLIANCE AUTOMATION
+────────────────────────────────
+
+The system automatically tests compliance with:
+  • HIPAA (US healthcare privacy law)
+  • NDPR (Nigeria data protection law)
+  • ISO 27001 (International security standard)
+
+Tests include:
+  ✓ Is encryption enabled?
+  ✓ Are passwords strong enough?
+  ✓ Are audit logs being kept?
+  ✓ Are backups being tested?
+  ✓ Is access control working?
+  ✓ Are security patches applied?
+
+You don't have to manually test everything - the system does it for you.
+
+
+FEATURE 3: ROLE-BASED ACCESS
+────────────────────────────
+
+Different users see different things:
+
+  VIEWER (read-only)
+  - Can see dashboards
+  - Cannot make changes
+  - Good for management, board
+
+  ANALYST
+  - Can see everything viewer sees
+  - Can acknowledge/resolve alerts
+  - Can mark suspicious activity as reviewed
+  - Can patch vulnerabilities
+
+  COMPLIANCE OFFICER
+  - All analyst permissions
+  - Plus: Run compliance checks
+  - Plus: Fix compliance controls
+  - Plus: Access audit logs
+  - Good for: Compliance manager
+
+  ADMIN
+  - Everything
+  - Manage users
+  - System settings
+  - Good for: IT director
+
+
+FEATURE 4: IMMUTABLE AUDIT LOG
+──────────────────────────────
+
+The audit log is "write-once, never erase":
+  • Every action is recorded
+  • Records are cryptographically signed
+  • Cannot be modified or deleted (even by admins)
+  • Tamper-evident - any modification is detected
+  • Legal proof that you're following rules
+
+Why this matters:
+  - Regulators trust the log because it can't be faked
+  - In a lawsuit, you have proof of what happened
+  - If hacked, the audit log shows how they got in
+
+
+FEATURE 5: RISK SCORING
+──────────────────────
+
+Risk score is calculated from:
+  • Number of open threats
+  • Number of unpatched vulnerabilities
+  • Missing security controls
+  • Outdated systems
+  • Weak passwords
+  • Missing encryption
+  • No backup/recovery plan
+
+Score ranges:
+  0-40 = Low risk (green) ✓
+  40-70 = Medium risk (yellow) ⚠
+  70-100 = High risk (red) ✗
+
+The score helps you prioritize:
+  - High risk? Fix vulnerabilities and threats
+  - Medium risk? Implement missing controls
+  - Low risk? Maintain current practices
+
+
+================================================================================
+6. WORKING SCENARIOS
+================================================================================
+
+SCENARIO 1: RANSOMWARE ATTACK
+────────────────────────────
+
+9:00am - Detection
+  System detects ransomware on 3 computers
+  Alerts trigger: "CRITICAL: Ransomware Detected"
+  Notification sent to IT manager
+
+9:15am - Response
+  Manager logs in
+  Sees CRITICAL alert on dashboard
+  Clicks alert to see details
+  Creates new Incident (#2026-001)
+  Assigns self as incident commander
+
+9:30am - Containment
+  Isolates 3 infected computers from network
+  Blocks attacker's IP address
+  Notifies staff not to use those computers
+  Updates incident timeline
+
+11:00am - Investigation
+  Checks audit log: "How did attacker get in?"
+  Finds: Unpatched Windows vulnerability
+  Creates vulnerability record for future reference
+
+2:00pm - Cleanup
+  IT staff cleans infected computers
+  Installs Windows updates
+  Re-enables security policies
+
+4:00pm - Recovery
+  Restores files from yesterday's backup
+  Tests that restore works
+  Brings computers back online
+  Verifies data integrity
+
+5:00pm - Documentation
+  Closes Incident #2026-001
+  Generates incident report
+  Updates risk assessment (risk score drops)
+  Files report for insurance
+
+Lessons learned:
+  - Backup saved the day
+  - Need faster patching process
+  - Need better monitoring for early detection
+
+
+SCENARIO 2: COMPLIANCE AUDIT
+────────────────────────────
+
+Regulator: "We're auditing your HIPAA compliance. Prove it."
+
+Hospital response:
+  1. Goes to Reports → Generate Compliance Report
+  2. Report shows: 88% HIPAA compliant
+  3. Includes: Which controls are passing, which are failing
+  4. Lists all fixes being made
+
+  5. Shows Audit Log
+  6. Regulator verifies log is unchangeable
+  7. Sees all access to patient records
+  8. Verifies encryption is enabled
+
+  9. Hospital provides incident reports
+  10. Shows all security problems were reported and fixed
+
+Result: Hospital passes audit
+
+If the hospital had NOT used HEALTHSEC:
+  ✗ No proof of compliance
+  ✗ No audit trail
+  ✗ Could lose license
+  ✗ Could be fined $100,000s
+
+
+SCENARIO 3: SUSPICIOUS INSIDER THREAT
+──────────────────────────────────────
+
+Situation:
+  Dr. Smith who works in Cardiology suddenly accesses 50 Pediatrics patient
+  records at 2am using a new device.
+
+System response:
+  Flags as suspicious:
+  ✓ Cross-department access (Cardiology → Pediatrics)
+  ✓ After-hours access (2am)
+  ✓ Accessing many records (50 records)
+  ✓ New device
+
+Alert created: "Suspicious Access Pattern - Dr. Smith"
+Manager notified
+
+Manager investigation:
+  Checks audit log:
+    - All 50 accesses logged with timestamp and IP
+    - New device recorded
+    - Search terms used recorded
+
+  Questions Dr. Smith:
+    - "Why were you accessing Pediatrics records?"
+    - Dr. Smith admits: "I'm helping a colleague, they gave me temporary access"
+
+  Manager verifies:
+    - Colleague confirms Dr. Smith was helping
+    - Access was legitimate (colleague sick, needed help)
+    - But: Should have requested formal access instead
+
+Resolution:
+  1. Requests formal access through proper channels
+  2. Marks alert as "Resolved - Legitimate"
+  3. Updates policy: "Temporary access must go through formal process"
+  4. Documents in audit log for future reference
+
+Without HEALTHSEC:
+  - Suspicious access would go unnoticed
+  - Could be patient data theft
+  - Hospital would never know
+
+
+SCENARIO 4: COMPLIANCE IMPROVEMENT
+──────────────────────────────────
+
+Current state:
+  Compliance score: 60% (not good)
+  Hospital has 15 failing controls
+
+Plan:
+  Focus on fixing the easiest wins first
+
+Month 1 - Easy wins:
+  ✓ Enforce strong passwords (+5%)
+  ✓ Enable backup testing (+8%)
+  New score: 73%
+
+Month 2 - Medium effort:
+  ✓ Implement 2-factor authentication (+7%)
+  ✓ Enable encryption on databases (+5%)
+  New score: 85%
+
+Month 3 - Harder work:
+  ✓ Audit all access controls (+3%)
+  ✓ Document security policy (+2%)
+  Final score: 90%
+
+Result: Hospital is now compliant and can pass audits
+
+
+================================================================================
+7. TROUBLESHOOTING
+================================================================================
+
+PROBLEM: I can't log in
+SOLUTION:
+  • Check username spelling
+  • Check password is correct
+  • Check if account is active (not disabled)
+  • Try resetting password
+  • Contact IT administrator
+
+PROBLEM: My score is going up (getting worse)
+REASON: This usually means:
+  • New threats were detected
+  • Vulnerabilities weren't patched
+  • Controls failed automated testing
+
+ACTION:
+  • Check "Recent Threats" - what's new?
+  • Check "Vulnerabilities" - which need patching?
+  • Run compliance check - which controls are failing?
+  • Fix the issues
+  • Score will improve as you fix things
+
+PROBLEM: Compliance check is running but shows no results
+REASON: Check is still in progress
+SOLUTION:
+  • Wait 5-10 minutes
+  • Refresh the page
+  • Check back later
+
+PROBLEM: I can't see a page I need
+REASON: Might be permission issue or page doesn't exist
+SOLUTION:
+  • Check your user role - do you have permission?
+  • Ask administrator to grant permission
+  • Check if page might be archived/hidden
+
+PROBLEM: Alert won't resolve
+REASON: System might be re-detecting the same issue
+SOLUTION:
+  • Make sure you actually fixed the problem
+  • Run a new risk assessment
+  • If problem still exists, system will create new alert
+  • Fix the underlying issue, not just the alert
+
+PROBLEM: Audit log is empty
+REASON: This is unusual - should always have records
+SOLUTION:
+  • Check if audit logging is enabled
+  • Check if you have permission to view audit log
+  • Contact IT administrator
+
+
+================================================================================
+8. TECHNICAL DETAILS FOR USERS
+================================================================================
+
+WHAT IS HIPAA?
+──────────────
+Health Insurance Portability and Accountability Act (US law)
+Requires:
+  • Patient data must be encrypted
+  • Access must be logged
+  • Passwords must be strong
+  • Security patches must be applied
+  • Backups must be tested
+  • Breach notification in 30 days
+Violation fine: $100 - $50,000 per offense
+
+WHAT IS NDPR?
+─────────────
+Nigeria Data Protection Regulation (Nigerian law)
+Requires:
+  • Personal data protection
+  • Consent for data collection
+  • Data subject rights
+  • Breach notification
+  • Data security measures
+Similar to HIPAA but for Nigeria
+
+
+WHAT IS ISO 27001?
+───────────────────
+International standard for information security
+Requires:
+  • Risk assessment
+  • Access control
+  • Encryption
+  • Incident response
+  • Business continuity
+  • Regular audits
+Used globally for certification
+
+
+WHAT IS PHI?
+─────────────
+Protected Health Information - any patient data:
+  • Names
+  • Medical record numbers
+  • Birth dates
+  • Test results
+  • Diagnoses
+  • Medications
+
+Must be:
+  • Encrypted
+  • Logged when accessed
+  • Restricted to who needs it
+  • Backed up regularly
+
+
+WHAT IS A CVE?
+───────────────
+Common Vulnerabilities and Exposures
+A database of known security weaknesses:
+  • CVE-2024-5678 = a specific known vulnerability
+  • CVSS 9.8 = severity score (0-10, higher = worse)
+  • Usually has a patch/fix available
+
+
+HOW DOES ENCRYPTION WORK?
+──────────────────────────
+Non-encrypted (dangerous):
+  Patient data stored as plain text
+  If hard drive stolen: data is readable
+
+Encrypted:
+  Patient data scrambled with a key
+  If hard drive stolen: data is unreadable garbage
+  Only person with key can decrypt
+
+HEALTHSEC checks: "Is encryption enabled?"
+
+
+WHAT IS 2-FACTOR AUTHENTICATION (2FA)?
+───────────────────────────────────────
+Normal: Username + Password
+  Problem: If password stolen, account is compromised
+
+2FA: Username + Password + Something else
+  Something else could be:
+    • Code from your phone
+    • Fingerprint
+    • Face recognition
+    • USB key
+
+Hackers need both password AND 2FA to get in
+Much more secure than password alone
+
+
+HOW DOES BACKUP AND RECOVERY WORK?
+───────────────────────────────────
+Daily: System backs up patient data to another location
+Monthly: Hospital tests if backup works (restore a test file)
+  Why test? Because untested backups often fail when you need them
+
+HEALTHSEC checks:
+  ✓ Is backup happening daily?
+  ✓ Is backup being tested monthly?
+  ✓ Can we restore files quickly?
+
+
+SECURITY INCIDENT PHASES
+─────────────────────────
+Detection: "We found a problem"
+Containment: "We stopped it from spreading"
+Eradication: "We removed the problem"
+Recovery: "We brought systems back online"
+Post-Incident: "We documented what happened"
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+SUMMARY FOR FINAL YEAR PROJECT
+═════════════════════════════════════════════════════════════════════════════
+
+KEEP THESE 8 PAGES (Essential):
+  1. Dashboard - overview
+  2. Monitoring (Healthcare Systems & Suspicious Activity)
+  3. Risk Engine (Dashboard, Threats, Vulnerabilities, Assessments)
+  4. Compliance (Dashboard, Controls, Remediation)
+  5. Alerts (List & Incidents)
+  6. Audit Log
+  7. Reports
+
+REMOVE THESE 6 PAGES (Not essential):
+  1. Patient Records
+  2. Access Logs
+  3. User Activity Heatmap
+  4. Threat Intel Feed
+  5. ML Status
+  6. Settings Page
+
+WHAT THE SYSTEM DOES (In One Paragraph):
+HEALTHSEC is a security and compliance management system for healthcare
+facilities. It monitors healthcare computer systems for security threats,
+tracks compliance with healthcare regulations (HIPAA, NDPR, ISO 27001),
+alerts staff to incidents, maintains an unchangeable audit trail, and
+generates reports for regulators. This helps hospitals stay secure and
+legally compliant, avoiding fines, lawsuits, and data breaches.
+
+WHO USES IT:
+  • Hospital IT staff - monitor security
+  • Security analysts - investigate threats
+  • Compliance officers - manage regulatory requirements
+  • Hospital executives - see risk/compliance scores for reporting
+  • Auditors - review audit logs
+
+WHY IT'S NEEDED:
+  • Hospitals are targets (patient data is valuable)
+  • Regulations require proof of security and compliance
+  • Hackers steal millions of patient records yearly
+  • A data breach can shut down a hospital
+  • Fines for non-compliance can be $millions
+
+═════════════════════════════════════════════════════════════════════════════
+
+END OF DOCUMENT
+═════════════════════════════════════════════════════════════════════════════

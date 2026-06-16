@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>404 Not Found | HealthSec CRIC HMS</title>
+  <link href="{% static 'azia/lib/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'azia/lib/typicons.font/typicons.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'azia/css/azia.css' %}">
+  <style>
+    body { background: #f4f5fb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .error-page { text-align: center; padding: 2rem; }
+    .error-num { font-size: 8rem; font-weight: 800; color: #5b47fb; line-height: 1; letter-spacing: -4px; }
+    .error-num span { color: #dc3545; }
+    .error-title { font-size: 1.5rem; font-weight: 700; color: #1a1a2e; margin: 1rem 0 .5rem; }
+    .error-text { color: #6c757d; margin-bottom: 2rem; }
+    .nav-pills .nav-link { color: #5b47fb; border: 1px solid #5b47fb; border-radius: 20px; margin: .25rem; font-size: .85rem; }
+    .nav-pills .nav-link:hover { background: #5b47fb; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <p class="error-num">4<span>0</span>4</p>
+    <h4 class="error-title">Page Not Found</h4>
+    <p class="error-text">The page you are looking for does not exist or has been moved.</p>
+    <ul class="nav justify-content-center flex-wrap">
+      <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="/monitoring/">Monitoring</a></li>
+      <li class="nav-item"><a class="nav-link" href="/alerts/">Alerts</a></li>
+      <li class="nav-item"><a class="nav-link" href="/audit/">Audit Log</a></li>
+    </ul>
+  </div>
+  <script src="{% static 'azia/lib/jquery/jquery.min.js' %}"></script>
+  <script src="{% static 'azia/lib/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

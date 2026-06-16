@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}Activity Monitor{% endblock %}
+{% block page_title %}Healthcare Information Monitoring{% endblock %}
+
+{% block extra_css %}
+<style>
+  .activity-row-suspicious { background: rgba(239,35,60,0.08) !important; }
+  .activity-row-suspicious:hover { background: rgba(239,35,60,0.14) !important; }
+  .hour-bar { height: 6px; border-radius: 3px; background: var(--hs-cyber-blue); transition: width .3s; }
+  .live-dot { width:10px; height:10px; border-radius:50%; background:var(--hs-health-grn); display:inline-block; margin-right:6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex align-items-center justify-content-between">
+  <div>
+    <h1><i class="fa-solid fa-tower-broadcast me-2 text-cyber"></i>Activity Monitor</h1>
+    <p class="text-muted2 mb-0">Real-time patient record access surveillance &mdash; Today</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <span class="live-dot pulse"></span>
+    <small class="text-muted2">Live</small>
+    <a href="{% url 'monitoring:suspicious_activity_list' %}" class="btn btn-sm btn-hs-danger">
+      <i class="fa-solid fa-triangle-exclamation me-1"></i>
+      Suspicious
+      {% if unresolved_suspicious %}<span class="badge bg-white text-danger ms-1">{{ unresolved_suspicious }}</span>{% endif %}
+    </a>
+  </div>
+</div>
+
+{# ── KPI Cards ── #}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card" style="--kpi-accent:var(--hs-cyber-blue);">
+      <div class="kpi-value">{{ total_today }}</div>
+      <div class="kpi-label">Total Accesses Today</div>
+      <i class="fa-solid fa-key kpi-icon text-cyber"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card {% if suspicious_today %}glow-danger{% endif %}" style="--kpi-accent:var(--hs-danger);">
+      <div class="kpi-value" style="color:var(--hs-danger);">{{ suspicious_today }}</div>
+      <div class="kpi-label">Suspicious Today</div>
+      <i class="fa-solid fa-triangle-exclamation kpi-icon" style="color:var(--hs-danger);"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card" style="--kpi-accent:var(--hs-warning);">
+      <div class="kpi-value" style="color:var(--hs-warning);">{{ flagged_records }}</div>
+      <div class="kpi-label">Flagged Records</div>
+      <i class="fa-solid fa-flag kpi-icon" style="color:var(--hs-warning);"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card" style="--kpi-accent:var(--hs-health-grn);">
+      <div class="kpi-value" style="color:var(--hs-health-grn);">{{ active_users }}</div>
+      <div class="kpi-label">Active Users Today</div>
+      <i class="fa-solid fa-users kpi-icon" style="color:var(--hs-health-grn);"></i>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {# ── Hourly Activity Chart ── #}
+  <div class="col-lg-8">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-chart-bar me-2 text-cyber"></i>Hourly Access Activity</span>
+        <small class="text-muted2">Today (0–23 h)</small>
+      </div>
+      <div class="hs-card-body">
+        <canvas id="hourlyChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# ── Quick Links ── #}
+  <div class="col-lg-4">
+    <div class="hs-card h-100">
+      <div class="hs-card-header">
+        <span class="hs-card-title"><i class="fa-solid fa-bolt me-2 text-cyber"></i>Quick Actions</span>
+      </div>
+      <div class="hs-card-body d-flex flex-column gap-2">
+        <a href="{% url 'monitoring:event_list' %}" class="btn btn-hs-outline w-100 text-start">
+          <i class="fa-solid fa-list me-2"></i> Monitoring Events
+        </a>
+        <a href="{% url 'monitoring:suspicious_activity_list' %}" class="btn btn-hs-outline w-100 text-start">
+          <i class="fa-solid fa-exclamation-triangle me-2"></i> Suspicious Activity
+        </a>
+        {% if request.user.is_analyst %}
+        <a href="{% url 'monitoring:suspicious_activity_list' %}?resolved=no" class="btn btn-hs-danger w-100 text-start">
+          <i class="fa-solid fa-bell me-2"></i>
+          Unresolved: {{ unresolved_suspicious }}
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Filters ── #}
+<div class="hs-card mb-3">
+  <div class="hs-card-header">
+    <span class="hs-card-title"><i class="fa-solid fa-filter me-2"></i>Filter Activity Feed</span>
+  </div>
+  <div class="hs-card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control form-control-sm" value="{{ filter_date }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="user" class="form-control form-control-sm" placeholder="Search user…" value="{{ filter_user }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Record Type</label>
+        <select name="record_type" class="form-select form-select-sm">
+          <option value="">All Types</option>
+          {% for val, label in record_type_choices %}
+            <option value="{{ val }}" {% if filter_record_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1">
+        <label class="form-label d-block">Suspicious</label>
+        <div class="form-check d-flex align-items-center" style="min-height:31px;">
+          <input type="checkbox" id="suspiciousOnly" name="suspicious_only" value="1" class="form-check-input mt-0"
+                 {% if filter_suspicious %}checked{% endif %}>
+          <label class="form-check-label ms-2 small text-muted2" for="suspiciousOnly">Only</label>
+        </div>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-hs-primary btn-sm flex-fill">
+          <i class="fa-solid fa-search me-1"></i>Filter
+        </button>
+        <a href="{% url 'monitoring:monitoring_dashboard' %}" class="btn btn-hs-outline btn-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# ── Recent Access Log Table ── #}
+<div class="hs-card">
+  <div class="hs-card-header">
+    <span class="hs-card-title">
+      <i class="fa-solid fa-clock-rotate-left me-2 text-cyber"></i>
+      Recent Access Events
+      {% if filter_suspicious %}<span class="badge badge-critical ms-2">Suspicious Only</span>{% endif %}
+    </span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="table table-hs mb-0">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Patient Code</th>
+          <th>Record Type</th>
+          <th>Action</th>
+          <th>Hour</th>
+          <th>IP</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr class="{% if log.is_suspicious %}activity-row-suspicious{% endif %}">
+          <td><code style="font-size:.78rem;color:var(--hs-text-muted);">{{ log.timestamp|date:"Y-m-d H:i:s" }}</code></td>
+          <td>
+            {% if log.user %}
+              <span class="text-cyber">{{ log.user.username }}</span>
+            {% else %}&mdash;{% endif %}
+          </td>
+          <td><strong>{{ log.patient_record.patient_code }}</strong></td>
+          <td><small class="text-muted2">{{ log.patient_record.get_record_type_display }}</small></td>
+          <td><span class="badge bg-secondary">{{ log.access_type }}</span></td>
+          <td>
+            <span class="{% if log.access_hour < 7 or log.access_hour > 20 %}text-danger2{% else %}text-muted2{% endif %}">
+              {{ log.access_hour }}:00
+            </span>
+          </td>
+          <td><small class="text-muted2">{{ log.ip_address|default:"—" }}</small></td>
+          <td>
+            {% if log.is_suspicious %}
+              <span class="badge badge-critical"><i class="fa-solid fa-triangle-exclamation me-1"></i>Suspicious</span>
+            {% else %}
+              <span class="badge badge-low">Normal</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted2 py-4">No access events match the current filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const hourly = {{ hourly_counts_json }};
+new Chart(document.getElementById('hourlyChart'), {
+  type: 'bar',
+  data: {
+    labels: Array.from({length:24}, (_,i) => i + ':00'),
+    datasets: [{
+      label: 'Accesses',
+      data: hourly,
+      backgroundColor: hourly.map((_,i) =>
+        (i < 7 || i > 20) ? 'rgba(239,35,60,0.6)' : 'rgba(0,180,216,0.6)'
+      ),
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, ticks: { stepSize: 1 } },
+      x: { ticks: { font: { size: 10 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

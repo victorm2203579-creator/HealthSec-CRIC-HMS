@@ -1,0 +1,122 @@
+[
+  {
+    "model": "accounts.user",
+    "pk": 1,
+    "fields": {
+      "username": "admin_user",
+      "email": "admin@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Admin",
+      "last_name": "User",
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": true,
+      "role": "ADMIN",
+      "department": "IT Security",
+      "phone_number": "+234123456789",
+      "must_change_password": false,
+      "date_joined": "2026-01-01T00:00:00Z",
+      "last_login": "2026-05-25T10:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 2,
+    "fields": {
+      "username": "analyst_user",
+      "email": "analyst@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Security",
+      "last_name": "Analyst",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "role": "ANALYST",
+      "department": "Security Operations",
+      "phone_number": "+234198765432",
+      "must_change_password": false,
+      "date_joined": "2026-01-15T00:00:00Z",
+      "last_login": "2026-05-24T14:30:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 3,
+    "fields": {
+      "username": "compliance_officer",
+      "email": "compliance@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Compliance",
+      "last_name": "Officer",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "role": "COMPLIANCE",
+      "department": "Compliance",
+      "phone_number": "+234155555555",
+      "must_change_password": false,
+      "date_joined": "2026-02-01T00:00:00Z",
+      "last_login": "2026-05-23T09:15:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 4,
+    "fields": {
+      "username": "viewer_user",
+      "email": "viewer@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Read",
+      "last_name": "Only",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "role": "VIEWER",
+      "department": "Management",
+      "phone_number": "+234144444444",
+      "must_change_password": false,
+      "date_joined": "2026-03-01T00:00:00Z",
+      "last_login": "2026-05-22T16:45:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 5,
+    "fields": {
+      "username": "clinician_user",
+      "email": "clinician@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Dr.",
+      "last_name": "Clinician",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false,
+      "role": "ANALYST",
+      "department": "Cardiology",
+      "phone_number": "+234133333333",
+      "must_change_password": false,
+      "date_joined": "2026-04-01T00:00:00Z",
+      "last_login": "2026-05-25T08:00:00Z"
+    }
+  },
+  {
+    "model": "accounts.user",
+    "pk": 6,
+    "fields": {
+      "username": "locked_user",
+      "email": "locked@healthsec.test",
+      "password": "pbkdf2_sha256$600000$abcdef1234567890$xyz==",
+      "first_name": "Locked",
+      "last_name": "Account",
+      "is_active": false,
+      "is_staff": false,
+      "is_superuser": false,
+      "role": "VIEWER",
+      "department": "Finance",
+      "phone_number": "+234122222222",
+      "must_change_password": true,
+      "date_joined": "2026-05-01T00:00:00Z",
+      "last_login": null
+    }
+  }
+]

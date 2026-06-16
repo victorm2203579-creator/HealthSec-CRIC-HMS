@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block page_title %}Profile — HealthSec{% endblock %}
+{% block page_header %}My Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-header-card {
+    background: linear-gradient(135deg, var(--hs-cyber-blue), var(--hs-navy));
+    border-radius: 16px;
+    padding: 40px 30px;
+    text-align: center;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--hs-cyber-blue), var(--hs-health-grn));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--hs-navy);
+    font-weight: 900;
+    margin: 0 auto 20px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,180,216,0.3);
+  }
+
+  .profile-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 4px solid var(--hs-surface);
+    background: var(--hs-health-grn);
+  }
+
+  .profile-avatar.inactive::after {
+    background: var(--hs-danger);
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--hs-text);
+    margin-bottom: 8px;
+  }
+
+  .profile-username {
+    color: var(--hs-border);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+  }
+
+  .profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .profile-section {
+    background: var(--hs-surface);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    border: 1px solid var(--hs-border);
+  }
+
+  .profile-section h6 {
+    color: var(--hs-text);
+    font-weight: 700;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .profile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--hs-border);
+  }
+
+  .profile-row:last-child {
+    border-bottom: none;
+  }
+
+  .profile-label {
+    color: var(--hs-text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .profile-value {
+    color: var(--hs-text);
+    font-size: 0.9rem;
+    text-align: right;
+    max-width: 50%;
+    word-break: break-word;
+  }
+
+  .profile-value.mono {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 justify-content-center">
+  <div class="col-12 col-lg-10 col-xl-8">
+
+    {# ── Profile Header Card ── #}
+    <div class="profile-header-card">
+      <div class="profile-avatar {% if not request.user.is_active %}inactive{% endif %}">
+        {{ request.user.username|first|upper }}
+      </div>
+      <div class="profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+      <div class="profile-username">@{{ request.user.username }}</div>
+
+      <div class="profile-badges">
+        <span class="badge" style="background:rgba(0,180,216,0.2);color:var(--hs-cyber-blue);">
+          <i class="fa-solid fa-user-shield me-1"></i>{{ request.user.get_role_display }}
+        </span>
+        <span class="badge" style="background:{% if request.user.is_active %}rgba(6,214,160,0.2){% else %}rgba(239,35,60,0.2){% endif %};color:{% if request.user.is_active %}var(--hs-health-grn){% else %}var(--hs-danger){% endif %};">
+          <i class="fa-solid fa-circle-dot me-1"></i>{% if request.user.is_active %}Active{% else %}Deactivated{% endif %}
+        </span>
+      </div>
+    </div>
+
+    {# ── Account Information ── #}
+    <div class="profile-section">
+      <h6><i class="fa-solid fa-user me-2 text-cyber"></i>Account Information</h6>
+
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-envelope me-2"></i>Email</span>
+        <span class="profile-value">{{ request.user.email }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-building me-2"></i>Department</span>
+        <span class="profile-value">{{ request.user.department|default:"Not specified" }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-phone me-2"></i>Phone</span>
+        <span class="profile-value">{{ request.user.phone_number|default:"Not specified" }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-calendar-day me-2"></i>Member Since</span>
+        <span class="profile-value">{{ request.user.date_joined|date:"M d, Y" }}</span>
+      </div>
+
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-clock-rotate-left me-2"></i>Last Login</span>
+        <span class="profile-value">{{ request.user.last_login|date:"M d, Y H:i"|default:"Never" }}</span>
+      </div>
+
+      {% if request.user.last_login_ip %}
+      <div class="profile-row">
+        <span class="profile-label"><i class="fa-solid fa-network-wired me-2"></i>Last Login IP</span>
+        <span class="profile-value mono">{{ request.user.last_login_ip }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    {# ── Security Settings ── #}
+    <div class="profile-section">
+      <h6><i class="fa-solid fa-shield-halved me-2 text-cyber"></i>Account Security</h6>
+
+      <div class="profile-row">
+        <span class="profile-label">Two-Factor Authentication</span>
+        <span class="profile-value">
+          {% if request.user.totp_auth.is_enabled %}
+            <span class="badge badge-low"><i class="fa-solid fa-circle-check me-1"></i>Enabled</span>
+          {% else %}
+            <span class="badge badge-medium"><i class="fa-solid fa-circle me-1"></i>Disabled</span>
+          {% endif %}
+        </span>
+      </div>
+
+      <div class="profile-row">
+        <span class="profile-label">Password Status</span>
+        <span class="profile-value">
+          {% if request.user.must_change_password %}
+            <span class="badge badge-critical"><i class="fa-solid fa-circle-exclamation me-1"></i>Change Required</span>
+          {% else %}
+            <span class="badge badge-low"><i class="fa-solid fa-circle-check me-1"></i>Current</span>
+          {% endif %}
+        </span>
+      </div>
+
+      <div class="d-grid gap-2 mt-4">
+        <a href="{% url 'accounts:change_password' %}" class="btn btn-sm btn-hs-outline">
+          <i class="fa-solid fa-key me-2"></i>Change Password
+        </a>
+        {% if request.user.role in 'ADMIN,ANALYST,COMPLIANCE' %}
+        <a href="{% url 'accounts:totp_setup' %}" class="btn btn-sm btn-hs-outline">
+          <i class="fa-solid fa-shield-halved me-2"></i>{% if request.user.totp_auth.is_enabled %}Manage{% else %}Setup{% endif %} 2FA
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ── Edit Profile ── #}
+    <div class="profile-section">
+      <h6><i class="fa-solid fa-user-pen me-2 text-cyber"></i>Profile Preferences</h6>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+          {% if field.field.widget.input_type == 'checkbox' %}
+            <div class="form-check">
+              {{ field }}
+              <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            </div>
+          {% else %}
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+          {% endif %}
+          {% if field.help_text %}<div class="text-muted2" style="font-size:0.78rem;">{{ field.help_text }}</div>{% endif %}
+          {% if field.errors %}<div class="text-danger2" style="font-size:0.8rem;">{{ field.errors.0 }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-hs-primary">
+          <i class="fa-solid fa-floppy-disk me-2"></i>Save Changes
+        </button>
+      </form>
+    </div>
+
+    {# ── Help Text ── #}
+    <div class="profile-section" style="background:rgba(0,180,216,0.05);border-color:var(--hs-cyber-blue);">
+      <h6><i class="fa-solid fa-circle-info me-2 text-cyber"></i>About Your Profile</h6>
+      <p class="text-muted2 small mb-0">
+        Your username, email, role, and department are managed by your system administrator.
+        The fields under "Profile Preferences" above are the only ones you can edit yourself.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

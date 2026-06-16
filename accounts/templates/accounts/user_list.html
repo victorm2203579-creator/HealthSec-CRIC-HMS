@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block page_title %}Users — HealthSec{% endblock %}
+{% block page_header %}User Management{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <p class="text-muted2 mb-0">{{ users|length }} registered user{{ users|length|pluralize }}</p>
+  {% if request.user.is_admin %}
+  <a href="{% url 'accounts:register' %}" class="btn btn-sm btn-hs-primary"><i class="fa-solid fa-user-plus me-1"></i>Add User</a>
+  {% endif %}
+</div>
+
+<div class="hs-card">
+  <div class="hs-card-body p-0">
+    {% if users %}
+    <div class="table-responsive">
+      <table class="table hs-table mb-0">
+        <thead>
+          <tr><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--hs-cyber-blue),var(--hs-health-grn));display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--hs-navy);font-weight:900;flex-shrink:0;">
+                  {{ user.username|first|upper }}
+                </div>
+                <span class="text-white fw-600">{{ user.username }}</span>
+              </div>
+            </td>
+            <td class="text-muted2">{{ user.email }}</td>
+            <td><span class="badge" style="background:rgba(0,180,216,0.15);color:var(--hs-cyber-blue);">{{ user.get_role_display }}</span></td>
+            <td>{% if user.is_active %}<span class="badge badge-sev-low">Active</span>{% else %}<span class="badge badge-sev-critical">Inactive</span>{% endif %}</td>
+            <td class="text-muted2">{{ user.last_login|date:"M d, Y"|default:"Never" }}</td>
+            <td>
+              {% if request.user.is_admin %}
+              <a href="/admin/accounts/user/{{ user.pk }}/change/" class="btn btn-xs btn-hs-outline">Edit</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5"><p class="text-muted2">No users found.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
