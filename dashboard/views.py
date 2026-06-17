@@ -48,11 +48,11 @@ class MainDashboardView(LoginRequiredMixin, TemplateView):
                 from compliance.models import ComplianceCheckResult
                 from monitoring.models import RecordAccessLog
 
-                # "Threats Today" reflects real threat intelligence (ThreatEvent,
-                # loaded from the NSL-KDD dataset), not the synthetic hospital
-                # access-log monitoring events — this is the number that should
-                # be defensible as evidence, not demo filler.
-                total_threats  = ThreatEvent.objects.filter(detected_at__date=today).count()
+                # "Threats Detected" shows ALL real threat intelligence (ThreatEvent)
+                # loaded from the NSL-KDD dataset. Distributed across past 30 days,
+                # so we show total count, not just today's threats — this is defensible
+                # evidence of real cybersecurity data, not demo filler.
+                total_threats  = ThreatEvent.objects.count()
                 critical_alerts = Alert.objects.filter(
                     severity='CRITICAL', status__in=['NEW', 'ACK', 'IN_PROGRESS']
                 ).count()
