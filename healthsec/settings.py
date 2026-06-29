@@ -250,6 +250,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True            # X-Content-Type-Options: nosniff
 X_FRAME_OPTIONS = 'DENY'                      # Clickjacking protection
 CSRF_COOKIE_HTTPONLY = False                  # Must be False so JS can read it for AJAX
 CSRF_COOKIE_SECURE = not DEBUG               # HTTPS only in production
+CSRF_COOKIE_SAMESITE = 'Lax'                 # Allow CSRF cookie in same-site requests (fixes form submission)
 SECURE_SSL_REDIRECT = not DEBUG              # Redirect HTTP → HTTPS in production
 SESSION_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 0 if DEBUG else 31536000  # 1 year HSTS in production
